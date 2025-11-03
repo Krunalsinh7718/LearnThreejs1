@@ -1,11 +1,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { MTLLoader } from 'https://unpkg.com/three@0.169.0/examples/jsm/loaders/MTLLoader.js';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { gsap } from "gsap";
 
 
 //scene setup
 const scene = new THREE.Scene();
-
 
 //camera setup
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -49,32 +52,92 @@ renderer.setAnimationLoop(animate);
 document.body.appendChild(renderer.domElement);
 
 //mesh setup
-{
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshStandardMaterial({ color: "green" });
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.castShadow = true;
-    mesh.position.set(0, 0.5, 0);
-    scene.add(mesh);
-}
+// ✅ Load the model
+// const loader = new GLTFLoader();
+// let model;
+// loader.load(
+//     './assets/table/wooden_table_02_4k.gltf', // Path to your model
+//     (gltf) => {
+//         model = gltf.scene;
+//         model.scale.set(1, 1, 1);
+//         model.position.set(0, -0.8, 0);
 
-{
-    const geometry = new THREE.SphereGeometry(0.5, 32, 32);
-    const material = new THREE.MeshStandardMaterial({ color: "red" });
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(2, 0.5, 0);
-    mesh.castShadow = true;
-    scene.add(mesh);
-}
+//         model.traverse((child) => {
+//             if (child.isMesh) {
+//                 child.castShadow = true;    // model casts shadow
+//                 child.receiveShadow = true; // optional: receives too
+//             }
+//         });
+//         scene.add(model);
+//     },
+//     (xhr) => {
+//         console.log(`Loading: ${(xhr.loaded / xhr.total * 100).toFixed(2)}%`);
+//     },
+//     (error) => {
+//         console.error('An error occurred:', error);
+//     }
+// );
 
-{
-    const geometry = new THREE.TorusKnotGeometry(0.5, 0.2, 100, 100);
-    const material = new THREE.MeshStandardMaterial({ color: "blue" });
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(-2, 0.5, 0);
-    mesh.castShadow = true;
-    scene.add(mesh);
-}
+
+// const loader1 = new OBJLoader();
+// let model1;
+//  loader1.load(
+//         'assets/bugatti/bugatti.obj', // <-- path to your OBJ file
+//         (object) => {
+//           object.scale.set(0.5, 0.5, 0.5);
+//           scene.add(object);
+//         },
+//         (xhr) => {
+//           console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+//         },
+//         (error) => {
+//           console.error('An error occurred:', error);
+//         }
+//       );
+
+const mtlLoader = new MTLLoader();
+mtlLoader.load('./assets/car2/Low-Poly-Racing-Car.mtl', (materials) => {
+  materials.preload();
+  const objLoader = new OBJLoader();
+  objLoader.setMaterials(materials);
+  objLoader.load('./assets/car2/Low-Poly-Racing-Car.obj', (object) => {
+    object.scale.set(0.005, 0.005, 0.005); 
+    object.position.set(0, -0.8, 0);
+
+     object.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+    scene.add(object)
+});
+});
+
+
+
+// const loader = new FBXLoader();
+// loader.load(
+//   './assets/car2/Low-Poly-Racing-Car.fbx', 
+//   (object) => {
+//     object.scale.set(0.005, 0.005, 0.005);  
+//     object.position.set(0, -0.8, 0);
+//     object.traverse((child) => {
+//       if (child.isMesh) {
+//         child.castShadow = true;
+//         child.receiveShadow = true;
+//       }
+//     });
+//     scene.add(object);
+//   },
+//   (xhr) => {
+//     console.log(`Loading: ${(xhr.loaded / xhr.total * 100).toFixed(2)}%`);
+//   },
+//   (error) => {
+//     console.error('Error loading FBX model:', error);
+//   }
+// );
+
 
 {
     const geometry = new THREE.PlaneGeometry(10, 4);
@@ -87,8 +150,8 @@ document.body.appendChild(renderer.domElement);
 }
 
 // Ambient Light (soft overall light)
-// const ambient = new THREE.AmbientLight(0xffffff, 0.5);
-// scene.add(ambient);
+const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambient);
 
 // Directional Light (like sunlight)
 const light2 = new THREE.DirectionalLight(0xffffff, 10);
@@ -153,8 +216,6 @@ controls.enableDamping = true;
 //animation loop
 function animate() {
     const time = Date.now() * 0.001;
-
-
 
     light.position.set(Math.sin(time) * 5, 5, Math.cos(time) * 5);
 
