@@ -49,7 +49,26 @@ async function loadSphere() {
   scene.add(sphere);
 }
 
-loadSphere();
+// loadSphere();
+
+const textureLoader = new THREE.TextureLoader();
+const colorMap = textureLoader.load('https://threejs.org/examples/textures/brick_diffuse.jpg');
+const bumpMap = textureLoader.load('https://threejs.org/examples/textures/brick_bump.jpg');
+const normalMap = textureLoader.load('https://threejs.org/examples/textures/brick_normal.jpg');
+const roughnessMap = textureLoader.load('https://threejs.org/examples/textures/brick_roughness.jpg');
+
+const material = new THREE.MeshStandardMaterial({
+  map: colorMap,
+  bumpMap: bumpMap,
+  bumpScale: 0.05,
+  normalMap: normalMap,
+  roughnessMap: roughnessMap,
+  roughness: 1.0,
+  metalness: 0.0
+});
+
+const sphere1 = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 64), material);
+scene.add(sphere1);
 
 // Ambient Light (soft overall light)
 const ambient = new THREE.AmbientLight(0xffffff, 0.1);
