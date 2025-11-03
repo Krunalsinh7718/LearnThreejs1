@@ -53,19 +53,23 @@ const mercuryOrbit = new THREE.Object3D();
 solarSystem.add(mercuryOrbit);
 solarSystemObjects.push(mercuryOrbit);
 
-const mercury = new Planet(planetsData.mercury, {
-    color: planetsData.mercury.color,
-    emissive: planetsData.mercury.color,
-    emissiveIntensity: 0.01
-});
-mercuryOrbit.add(mercury);
-
 // const mercury = new Planet(planetsData.mercury, {
 //     color: planetsData.mercury.color,
 //     emissive: planetsData.mercury.color,
 //     emissiveIntensity: 0.01
 // });
+// mercuryOrbit.add(mercury);
+
+const mercury = createSphere(planetsData.mercury.radius, {
+    color: planetsData.mercury.color,
+    emissive: planetsData.mercury.color,
+    emissiveIntensity: 1
+}, { x: planetsData.mercury.distance, y: 0, z: 0 });
+mercuryOrbit.add(mercury);
 // solarSystemObjects.push(mercury);
+planetsData.mercury.planetGroup = mercury;
+
+
 planetsData.mercury.planetGroup = mercury;
 
 const venusOrbit = new THREE.Object3D();
@@ -196,25 +200,24 @@ function animate() {
     for (const [key, value] of Object.entries(planetsData)) {
 
         const { distance, orbitTime, planetGroup } = value;
-        console.log(planetGroup);
         
 
-        // if (orbitTime === 0) continue;
-        // const angle = (elapsed / orbitTime) * Math.PI * 2; 
-        // planetGroup.position.set(
-        //     Math.cos(angle) * distance,
-        //     0,
-        //     Math.sin(angle) * distance
-        // );
+        if (orbitTime === 0) continue;
+        const angle = (elapsed / orbitTime) * Math.PI * 2; 
+        planetGroup.position.set(
+            Math.cos(angle) * distance,
+            0,
+            Math.sin(angle) * distance
+        );
 
-        // planetGroup.label && (planetGroup.label.lookAt(camera.position));
+        planetGroup.label && (planetGroup.label.lookAt(camera.position));
 
-        // if (planetGroup.ring) {
-        //     const distToCam = planetGroup.group.position.distanceTo(camera.position);
-        //     const scaleFactor = distToCam * 0.015; 
-        //     planetGroup.label.scale.set(scaleFactor, scaleFactor / 2, 1);
-        //     planetGroup.ring.scale.set(scaleFactor * 0.1, scaleFactor * 0.1, scaleFactor * 0.1);
-        // }
+        if (planetGroup.ring) {
+            const distToCam = planetGroup.group.position.distanceTo(camera.position);
+            const scaleFactor = distToCam * 0.015; 
+            planetGroup.label.scale.set(scaleFactor, scaleFactor / 2, 1);
+            planetGroup.ring.scale.set(scaleFactor * 0.1, scaleFactor * 0.1, scaleFactor * 0.1);
+        }
 
 
     }

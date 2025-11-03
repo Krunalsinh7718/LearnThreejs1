@@ -19,7 +19,7 @@ function createTextLabel(text) {
     canvas.width = size;
     canvas.height = size;
 
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = 'red';
     ctx.font = '48px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -29,6 +29,7 @@ function createTextLabel(text) {
     const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
     const sprite = new THREE.Sprite(material);
     sprite.scale.set(10, 5, 1);
+    sprite.position.set(3, 0, 0);
     return sprite;
 }
 

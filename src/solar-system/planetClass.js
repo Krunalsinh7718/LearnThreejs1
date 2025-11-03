@@ -13,7 +13,8 @@ class Planet {
         this.group.add(this.ring);
 
         this.label = createTextLabel(data.name);
-        console.log(this.label);
+        // this.label.position.set(0, data.radius * 10, 0);
+        // console.log("label :",this.label);
         
         this.group.add(this.label);
     }
