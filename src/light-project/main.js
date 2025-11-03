@@ -25,19 +25,19 @@ const camParams = { angle: 0 }; // an object with a numeric property
 //   repeat: -1
 // });
 
-// gsap.to(camParams, {
-//     angle: Math.PI * 2,
-//     duration: 6,
-//     repeat: -1,
-//     ease: "none",
-//     onUpdate: () => {
-//         const radius = 5;
-//         camera.position.x = Math.sin(camParams.angle) * radius;
-//         camera.position.z = Math.cos(camParams.angle) * radius;
-//         camera.position.y = Math.sin(camParams.angle * 0.5) * 1.5;
-//         camera.lookAt(0, 0, 0);
-//     }
-// });
+gsap.to(camParams, {
+    angle: Math.PI * 2,
+    duration: 6,
+    repeat: -1,
+    ease: "none",
+    onUpdate: () => {
+        const radius = 5;
+        camera.position.x = Math.sin(camParams.angle) * radius;
+        camera.position.z = Math.cos(camParams.angle) * radius;
+        camera.position.y = Math.sin(camParams.angle * 0.5) * 1.5;
+        camera.lookAt(0, 0, 0);
+    }
+});
 
 //renderer setup
 const renderer = new THREE.WebGLRenderer();
@@ -46,63 +46,10 @@ renderer.setAnimationLoop(animate);
 document.body.appendChild(renderer.domElement);
 
 //mesh setup
-const mainObj = new THREE.Object3D();
-scene.add(mainObj);
-{
-    const geometry = new THREE.PlaneGeometry(8, 5);
-    const material = new THREE.MeshStandardMaterial({
-        color: "#cececeff",
-         side: THREE.DoubleSide
-    });
-    const plane = new THREE.Mesh(geometry, material);
-    plane.position.set(0, -1.2, 0);
-    plane.rotation.x = -Math.PI / 2;
-    mainObj.add(plane);
-}
-
-{
-
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshStandardMaterial({
-        color: 0x00ff00,
-        roughness: 0,
-    });
-    const cube = new THREE.Mesh(geometry, material);
-    mainObj.add(cube);
-}
-{
-    const geometry = new THREE.SphereGeometry(0.5, 32, 32);
-    const material = new THREE.MeshPhongMaterial({ color: 0x0000ff });
-    const sphere = new THREE.Mesh(geometry, material);
-    sphere.position.set(1.5, 0, 0);
-    mainObj.add(sphere);
-}
-{
-    const geometry = new THREE.TorusKnotGeometry(0.5, 0.18, 300, 100);
-    const material = new THREE.MeshPhysicalMaterial({
-        color: "#049ef4",
-        emissive: "#000",
-        roughness: 1,
-        metalness: 0,
-        ior: 2,
-        reflectivity: 1,
-        iridescence: 1,
-        iridescencelOR: 1,
-        sheen: 1,
-        sheenRoughness: 1,
-        sheenColor: "#000",
-        clearcoat: 1,
-        clearcoatRoughness: 0,
-        specularIntensity: 0
-
-    });
-    const torusKnot = new THREE.Mesh(geometry, material);
-    mainObj.add(torusKnot);
-    torusKnot.position.set(-2, 0, 0);
-}
-
-
-
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
 
 // Ambient Light (soft overall light)
 const ambient = new THREE.AmbientLight(0xffffff, 0.1);
@@ -112,10 +59,6 @@ scene.add(ambient);
 const dirLight = new THREE.DirectionalLight(0xffffff, 1);
 dirLight.position.set(5, 5, 5);
 scene.add(dirLight);
-
-const dirLight1 = new THREE.DirectionalLight(0xffffff, 1);
-dirLight1.position.set(-5, 5, 5);
-scene.add(dirLight1);
 
 //point light
 // const light = new THREE.PointLight(0xffffff, 1);
