@@ -1,10 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { gsap } from "gsap";
-import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader } from 'three/examples/jsm/Addons.js';
-import typefaceFont from 'three/examples/fonts/helvetiker_regular.typeface.json'
 import GUI from 'lil-gui';
 
 // GUI setup
@@ -42,48 +40,52 @@ lodingManager.onError = (url) => {
 };
 
 const textureLoader = new THREE.TextureLoader(lodingManager);
-const matcapTexture = textureLoader.load('./assets/textures/matcaps/8.png');
-matcapTexture.colorSpace = THREE.SRGBColorSpace
+const matcapTexture1 = textureLoader.load('./assets/textures/matcaps/4.png');
+const matcapTexture2 = textureLoader.load('./assets/textures/matcaps/8.png');
+matcapTexture1.colorSpace = THREE.SRGBColorSpace
 
 const groupMain = new THREE.Group();
 const groupChild = new THREE.Group();
 
+//animate particles
 gsap.to(groupChild.rotation, {
   y: Math.PI * 0.2,
   ease: "sine.inOut",
 })
 
-gsap.to(groupChild.rotation, {
-  // y : Math.PI * -0.2,
-  z: Math.PI * 0.5,
- 
-  duration: 8,
+const gsapParticlesCommon = {
   repeat: -1,
   yoyo: true,
   ease: "sine.inOut",
   overwrite: "auto",
+}
+gsap.to(groupChild.rotation, {
+  z: Math.PI * 0.5,
+  duration: 8,
+  ...gsapParticlesCommon
 })
 
 gsap.to(groupChild.rotation, {
-  // y : Math.PI * -0.2,
- 
   x: Math.PI * 0.5,
   duration: 12,
   repeat: -1,
-  yoyo: true,
-  ease: "sine.inOut",
-  overwrite: "auto",
+  ...gsapParticlesCommon
 })
 
 groupMain.add(groupChild);
 scene.add(groupMain);
 
-
+const fonts = {
+  helvetikerRegular : "helvetiker_regular.typeface.json",
+  helvetikerBold : "helvetiker_bold.typeface.json",
+  gentilisBold : "gentilis_bold.typeface.json",
+  optimerBold : "optimer_bold.typeface.json",
+}
 async function loadFont() {
   const loader = new FontLoader();
-  const font = await loader.loadAsync('/fonts/helvetiker_regular.typeface.json');
+  const font = await loader.loadAsync(`/fonts/${fonts.helvetikerBold}`);
 
-  const geometry = new TextGeometry('Hello Three.js', {
+  const textGeo = new TextGeometry('Hello Three.js', {
     font: font,
     size: 0.5,
     depth: 0.2,
@@ -94,29 +96,43 @@ async function loadFont() {
     bevelOffset: 0,
     bevelSegments: 5
   });
-  geometry.center();
-  const material = new THREE.MeshMatcapMaterial({ matcap: matcapTexture })
-  // const material = new THREE.MeshBasicMaterial({color: "red"})
-  const text = new THREE.Mesh(geometry, material)
-  groupMain.add(text)
+  textGeo.center();
+  const material1 = new THREE.MeshMatcapMaterial({ matcap: matcapTexture1 });
+  const material2 = new THREE.MeshMatcapMaterial({ matcap: matcapTexture2 });
+
+  const textMesh = new THREE.Mesh(textGeo, material1)
+  groupMain.add(textMesh)
 
 
-  const torusGeo = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);
+  const boxGeo = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);
+  const torusGeo = new THREE.TorusGeometry(0.5, 0.3, 60, 60);
+  const triangelGeo = new THREE.TetrahedronGeometry();
+
+  let finalGeometry = boxGeo;
+  
   for (let index = 0; index < 100; index++) {
-    const torus = new THREE.Mesh(torusGeo, material);
-    torus.position.set(
+    const randNum = Math.random();
+    if( randNum > 0.75){
+      finalGeometry = boxGeo;
+    }else if(randNum > 0.35){
+      finalGeometry = torusGeo;
+    }else{
+      finalGeometry = triangelGeo;
+    }
+    const particleMesh = new THREE.Mesh(finalGeometry, material1);
+    particleMesh.position.set(
       (Math.random() - 0.5) * 20,
       (Math.random() - 0.5) * 20,
       (Math.random() - 0.5) * 20,
     )
 
-    torus.rotation.x = Math.random() * Math.PI
-    torus.rotation.y = Math.random() * Math.PI
+    particleMesh.rotation.x = Math.random() * Math.PI
+    particleMesh.rotation.y = Math.random() * Math.PI
 
     const scale = Math.random() + 0.2
-    torus.scale.set(scale, scale, scale)
+    particleMesh.scale.set(scale, scale, scale)
 
-    groupChild.add(torus)
+    groupChild.add(particleMesh)
 
   }
 }
@@ -124,6 +140,7 @@ async function loadFont() {
 // Load text
 loadFont();
 
+//lights
 const ambient = new THREE.AmbientLight(0xffffff, 1);
 scene.add(ambient);
 
@@ -131,7 +148,6 @@ scene.add(ambient);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-
 
 //animation loop
 const clock = new THREE.Clock();
