@@ -105,17 +105,15 @@ async function loadFont() {
 
 
   const boxGeo = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);
-  const torusGeo = new THREE.TorusGeometry(0.5, 0.3, 60, 60);
+  const torusGeo = new THREE.TorusGeometry(0.5, 0.3, 15, 15);
   const triangelGeo = new THREE.TetrahedronGeometry();
 
   let finalGeometry = boxGeo;
   
   for (let index = 0; index < 100; index++) {
     const randNum = Math.random();
-    if( randNum > 0.75){
+    if( randNum > 0.5){
       finalGeometry = boxGeo;
-    }else if(randNum > 0.35){
-      finalGeometry = torusGeo;
     }else{
       finalGeometry = triangelGeo;
     }
