@@ -91,6 +91,9 @@ const doorNormalTexture = textureLoader.load('./assets/door/normal.webp')
 const doorMetalnessTexture = textureLoader.load('./assets/door/metalness.webp')
 const doorRoughnessTexture = textureLoader.load('./assets/door/roughness.webp')
 
+// floating ghost
+const fGhostTexture = textureLoader.load('./assets/ghost/ghost.webp')
+
 const textures = [
   { texture: floorColorTexture, repeatCount: { x: 8, y: 8 } },
   { texture: floorARMTexture, repeatCount: { x: 8, y: 8 } },
@@ -263,7 +266,20 @@ for (let i = 0; i < 30; i++) {
   // Add to the graves group
   graves.add(grave)
 }
+/**
+ * floating ghost
+ */
 
+const fGhostGeometry = new THREE.PlaneGeometry(1,1);
+const fGhostMaterial = new THREE.MeshStandardMaterial({
+  color: fGhostTexture,
+  transparent: true,
+  alphaMap: fGhostTexture
+})
+const fGhost1 = new THREE.Mesh(fGhostGeometry,fGhostMaterial);
+fGhost1.position.set(2,1,-5);
+fGhost1.position.set(-2,1,-8);
+scene.add(fGhost1);
 
 /**
  * Lights
