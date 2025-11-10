@@ -266,20 +266,45 @@ for (let i = 0; i < 30; i++) {
   // Add to the graves group
   graves.add(grave)
 }
-/**
- * floating ghost
- */
 
-const fGhostGeometry = new THREE.PlaneGeometry(1,1);
+/**
+ * floating ghosts
+ */
+const fGhostGroup = new THREE.Group();
+fGhostGroup.name = 'fGhostGroup';
+const fGhostGeometry = new THREE.PlaneGeometry(1, 1);
 const fGhostMaterial = new THREE.MeshStandardMaterial({
   color: fGhostTexture,
   transparent: true,
   alphaMap: fGhostTexture
 })
-const fGhost1 = new THREE.Mesh(fGhostGeometry,fGhostMaterial);
-fGhost1.position.set(2,1,-5);
-fGhost1.position.set(-2,1,-8);
-scene.add(fGhost1);
+scene.add(fGhostGroup);
+
+
+
+for (let i = 0; i < 5; i++) {
+
+  const angle = Math.random() * Math.PI * 2
+  const radius = 6 + Math.random() * 7
+  const x = Math.sin(angle) * radius
+  const z = Math.cos(angle) * radius
+
+  // Mesh
+  const fGhost = new THREE.Mesh(fGhostGeometry, fGhostMaterial);
+  fGhost.position.set(x, Math.random() * 0.4, z);
+
+  fGhost.rotation.x = (Math.random() - 0.5) * 0.4
+  fGhost.rotation.y = (Math.random() - 0.5) * 0.4
+  fGhost.rotation.z = (Math.random() - 0.5) * 0.4
+
+
+  // Add to the graves group
+  fGhostGroup.add(fGhost)
+
+  // console.log(fGhost.position.distanceTo(camera.position))
+}
+// console.log(fGhostGroup);
+
 
 /**
  * Lights
@@ -329,6 +354,8 @@ ghost3.shadow.mapSize.width = 256
 ghost3.shadow.mapSize.height = 256
 ghost3.shadow.camera.far = 10
 
+
+
 //controls setup
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -345,10 +372,9 @@ walls.receiveShadow = true
 roof.castShadow = true
 floor.receiveShadow = true
 
-for(const grave of graves.children)
-{
-    grave.castShadow = true
-    grave.receiveShadow = true
+for (const grave of graves.children) {
+  grave.castShadow = true
+  grave.receiveShadow = true
 }
 
 /**
@@ -377,11 +403,10 @@ scene.add(sky);
 scene.fog = new THREE.FogExp2('#04343f', 0.1);
 
 
-
 /**
  * Animate
  */
-const timer = new Timer();
+const timer = new Timer(); 
 function animate() {
 
   // Timer
@@ -403,6 +428,16 @@ function animate() {
   ghost3.position.x = Math.cos(ghost3Angle) * 6
   ghost3.position.z = Math.sin(ghost3Angle) * 6
   ghost3.position.y = Math.sin(ghost3Angle) * Math.sin(ghost3Angle * 2.34) * Math.sin(ghost3Angle * 3.45)
+
+
+  for (let i = 0; i < fGhostGroup.children.length; i++) {
+    fGhostGroup.children[i].lookAt(camera.position);
+    const ghost4Angle = elapsedTime * 0.23
+    fGhostGroup.children[i].position.y = Math.abs(Math.cos(ghost4Angle) * 2 * (i * 0.5))
+
+  }
+  const lightAngle = elapsedTime * 4;
+  doorLight.intensity = Math.sin(lightAngle) * Math.sin(lightAngle * 2.34) * 5 ;
 
   // Update controls
   controls.update();
