@@ -276,7 +276,9 @@ const fGhostGeometry = new THREE.PlaneGeometry(1, 1);
 const fGhostMaterial = new THREE.MeshStandardMaterial({
   color: fGhostTexture,
   transparent: true,
-  alphaMap: fGhostTexture
+  alphaMap: fGhostTexture,
+  depthWrite : false,
+
 })
 scene.add(fGhostGroup);
 
@@ -432,8 +434,10 @@ function animate() {
 
   for (let i = 0; i < fGhostGroup.children.length; i++) {
     fGhostGroup.children[i].lookAt(camera.position);
-    const ghost4Angle = elapsedTime * 0.23
-    fGhostGroup.children[i].position.y = Math.abs(Math.cos(ghost4Angle) * 2 * (i * 0.5))
+    const ghost4Angle = elapsedTime * 0.1
+    fGhostGroup.children[i].position.y = Math.abs(Math.cos(ghost4Angle + i) * Math.cos(ghost4Angle + i * 2.34) * 3.45 )
+    fGhostGroup.children[i].position.x = Math.cos(ghost4Angle + i) * 6
+    fGhostGroup.children[i].position.z = Math.sin(ghost4Angle + i) * 6
 
   }
   const lightAngle = elapsedTime * 4;

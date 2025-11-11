@@ -45,26 +45,41 @@ document.body.appendChild(renderer.domElement);
  * Particles
  */
 const particlesGeometry = new THREE.BufferGeometry()
-const count = 5000
+const count = 20000
 
-const positions = new Float32Array(count * 3) 
+const positions = new Float32Array(count * 3);
+const colors = new Float32Array(count * 3);
+
 for(let i = 0; i < count * 3; i++) 
 {
-    positions[i] = (Math.random() - 0.5) * 10 
+    positions[i] = (Math.random() - 0.5) * 10;
+    colors[i] = Math.random();
 }
 particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3)) 
+particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3)) 
 
 const particlesMaterial = new THREE.PointsMaterial({
-    color: "pink",
+    // color: "#ff88cc",
     map: particle,
     transparent: true,
     alphaMap: particle,
     size: 0.1,
     sizeAttenuation: true,
+    // alphaTest : 0.001
+    // depthTest: false
+    depthWrite : false,
+    // blending: THREE.AdditiveBlending
+    vertexColors: true
 })
 // Points
 const particles = new THREE.Points(particlesGeometry, particlesMaterial)
 scene.add(particles)
+
+const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(),
+    new THREE.MeshBasicMaterial()
+)
+scene.add(cube)
 
 //lights
 const ambient = new THREE.AmbientLight(0xffffff, 1);
