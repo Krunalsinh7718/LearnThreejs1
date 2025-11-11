@@ -437,7 +437,8 @@ function animate() {
 
   }
   const lightAngle = elapsedTime * 4;
-  doorLight.intensity = Math.sin(lightAngle) * Math.sin(lightAngle * 2.34) * 5 ;
+  doorLight.intensity = Math.max(Math.sin(lightAngle) * Math.sin(lightAngle * 2.34) * 5, 0) ;
+  
 
   // Update controls
   controls.update();
