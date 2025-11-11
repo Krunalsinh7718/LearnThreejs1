@@ -7,7 +7,8 @@ import GUI from 'lil-gui';
 import { Timer } from '../common/Timer.js';
 
 // GUI setup
-// const gui = new GUI();
+const gui = new GUI();
+
 //loading manager
 const lodingManager = new THREE.LoadingManager();
 lodingManager.onStart = () => {
@@ -24,7 +25,7 @@ lodingManager.onError = (url) => {
 };
 
 const textureLoader = new THREE.TextureLoader(lodingManager);
-const particle = textureLoader.load('./assets/alpha/9.png')
+// const particle = textureLoader.load('./assets/alpha/9.png')
 
 //scene setup
 const scene = new THREE.Scene();
@@ -43,44 +44,70 @@ renderer.setAnimationLoop(animate);
 document.body.appendChild(renderer.domElement);
 
 /**
- * Particles
+ * Galaxy
  */
-const particlesGeometry = new THREE.BufferGeometry()
-const count = 20000
+const parameters = {}
+parameters.count = 100000
+parameters.size = 0.01
+parameters.radius = 5
+parameters.branches = 3
+parameters.spin = 1
 
-const positions = new Float32Array(count * 3);
-const colors = new Float32Array(count * 3);
+let geometry = null
+let material = null
+let points = null
 
-for (let i = 0; i < count * 3; i++) {
-  positions[i] = (Math.random() - 0.5) * 10;
-  colors[i] = Math.random();
+const generateGalaxy = () => {
+
+  // Destroy old galaxy
+  if (points !== null) {
+    geometry.dispose()
+    material.dispose()
+    scene.remove(points)
+  }
+
+  geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(parameters.count * 3)
+
+  for (let i = 0; i < parameters.count; i++) {
+    const i3 = i * 3;
+
+    const radius = Math.random() * parameters.radius;
+    const spinAngle = radius * parameters.spin
+    const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2
+
+    positions[i3] = Math.cos(branchAngle * spinAngle) * radius
+    positions[i3 + 1] = 0
+    positions[i3 + 2] = Math.sin(branchAngle * spinAngle) * radius
+  }
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+  /**
+   * Material
+   */
+  material = new THREE.PointsMaterial({
+    size: parameters.size,
+    sizeAttenuation: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending
+  })
+
+  /**
+   * Points
+   */
+  points = new THREE.Points(geometry, material)
+  scene.add(points)
+
 }
-particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 
-const particlesMaterial = new THREE.PointsMaterial({
-  // color: "#ff88cc",
-  map: particle,
-  transparent: true,
-  alphaMap: particle,
-  size: 0.1,
-  sizeAttenuation: true,
-  // alphaTest : 0.001
-  // depthTest: false
-  depthWrite: false,
-  // blending: THREE.AdditiveBlending
-  vertexColors: true
-})
-// Points
-const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-// particles.rotation.y = 3.14
-scene.add(particles)
+generateGalaxy()
 
-const cube = new THREE.Mesh(
-  new THREE.BoxGeometry(),
-  new THREE.MeshBasicMaterial()
-)
-scene.add(cube)
+
+gui.add(parameters, 'count').min(100).max(1000000).step(100).onFinishChange(generateGalaxy)
+gui.add(parameters, 'size').min(0.001).max(0.1).step(0.001).onFinishChange(generateGalaxy)
+gui.add(parameters, 'radius').min(0.01).max(20).step(0.01).onFinishChange(generateGalaxy)
+gui.add(parameters, 'branches').min(2).max(20).step(1).onFinishChange(generateGalaxy)
+gui.add(parameters, 'spin').min(- 5).max(5).step(0.001).onFinishChange(generateGalaxy)
 
 //lights
 const ambient = new THREE.AmbientLight(0xffffff, 1);
@@ -99,22 +126,6 @@ function animate() {
   timer.update()
   const elapsedTime = timer.getElapsed() * 0.2;
 
-
-  // particles.rotation.x = elapsedTime;
-  // particles.rotation.z = elapsedTime;
-  // particles.rotation.y = elapsedTime;
-
-  for (let i = 0; i < count; i++) {
-    let i3 = i * 3
-
-    const x = particlesGeometry.attributes.position.array[i3];
-    const y = particlesGeometry.attributes.position.array[i3 + 1];
-    const z = particlesGeometry.attributes.position.array[i3 + 2];
-    // particlesGeometry.attributes.position.array[i3] = Math.sin(elapsedTime + z )
-    // particlesGeometry.attributes.position.array[i3 + 1] = Math.cos(elapsedTime + x )
-    particlesGeometry.attributes.position.array[i3 + 2] = Math.cos(elapsedTime + y )
-  }
-  particlesGeometry.attributes.position.needsUpdate = true
   controls.update();
   renderer.render(scene, camera);
 }

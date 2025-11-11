@@ -273,12 +273,14 @@ for (let i = 0; i < 30; i++) {
 const fGhostGroup = new THREE.Group();
 fGhostGroup.name = 'fGhostGroup';
 const fGhostGeometry = new THREE.PlaneGeometry(1, 1);
-const fGhostMaterial = new THREE.MeshStandardMaterial({
+const fGhostMaterial = new THREE.MeshBasicMaterial({
   color: fGhostTexture,
   transparent: true,
+  opacity: 0.5,
   alphaMap: fGhostTexture,
   depthWrite : false,
-
+  roughness: 1,
+  matelness: 1
 })
 scene.add(fGhostGroup);
 
