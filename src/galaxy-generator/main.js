@@ -32,7 +32,7 @@ const scene = new THREE.Scene();
 
 //camera setup
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 5);
+camera.position.set(5, 5, 5);
 camera.lookAt(0, 0, 0);
 
 //renderer setup
@@ -72,13 +72,13 @@ const generateGalaxy = () => {
   for (let i = 0; i < parameters.count; i++) {
     const i3 = i * 3;
 
-    const radius = Math.random() * parameters.radius;
-    const spinAngle = radius * parameters.spin
-    const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2
+     const radius = Math.random() * parameters.radius;
+     const spinAngle = radius * parameters.spin;
+     const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2
 
-    positions[i3] = Math.cos(branchAngle * spinAngle) * radius
+    positions[i3] = Math.cos(branchAngle + spinAngle) * radius
     positions[i3 + 1] = 0
-    positions[i3 + 2] = Math.sin(branchAngle * spinAngle) * radius
+    positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius
   }
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 
@@ -117,6 +117,11 @@ scene.add(ambient);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
+
+//axis helper
+const axisHelper = new THREE.AxesHelper();
+axisHelper.setColors("red", "yellow", "blue")//x, y, z
+scene.add(axisHelper)
 
 //animation loop
 const timer = new Timer();
