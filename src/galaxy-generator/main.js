@@ -1,157 +1,78 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { gsap } from "gsap";
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
-import { FontLoader } from 'three/examples/jsm/Addons.js';
-import GUI from 'lil-gui';
-import { Timer } from '../common/Timer.js';
+import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/Addons.js";
+import { Timer } from "../common/Timer.js"
 
-// GUI setup
-const gui = new GUI();
-
-//loading manager
-const lodingManager = new THREE.LoadingManager();
-lodingManager.onStart = () => {
-  console.log('Loading started');
-};
-lodingManager.onLoad = () => {
-  console.log('Loading complete');
-};
-lodingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
-  console.log(`Loading file: ${url}. Loaded ${itemsLoaded} of ${itemsTotal} files.`);
-};
-lodingManager.onError = (url) => {
-  console.error(`There was an error loading ${url}`);
-};
-
-const textureLoader = new THREE.TextureLoader(lodingManager);
-// const particle = textureLoader.load('./assets/alpha/9.png')
 
 //scene setup
 const scene = new THREE.Scene();
 
-//camera setup
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(5, 5, 5);
-camera.lookAt(0, 0, 0);
+//mesh
+const geometry = new THREE.BufferGeometry();
 
-//renderer setup
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.setAnimationLoop(animate);
-document.body.appendChild(renderer.domElement);
-
-/**
- * Galaxy
- */
-const parameters = {}
-parameters.count = 100000
-parameters.size = 0.01
-parameters.radius = 5
-parameters.branches = 3
-parameters.spin = 1
-parameters.randomness = 0.2
-parameters.randomPower = 2
-
-let geometry = null
-let material = null
-let points = null
-
-const generateGalaxy = () => {
-
-  // Destroy old galaxy
-  if (points !== null) {
-    geometry.dispose()
-    material.dispose()
-    scene.remove(points)
-  }
-
-  geometry = new THREE.BufferGeometry();
-  const positions = new Float32Array(parameters.count * 3)
-
-  for (let i = 0; i < parameters.count; i++) {
-    const i3 = i * 3;
-
-    const radius = Math.random() * parameters.radius;
-    const spinAngle = radius * parameters.spin;
-    const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2
-
-    const randomX = Math.pow(Math.random(), parameters.randomPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius
-    const randomY = Math.pow(Math.random(), parameters.randomPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius
-    const randomZ = Math.pow(Math.random(), parameters.randomPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius
-
-    positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX
-    positions[i3 + 1] = 0 + randomY
-    positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ
-
-
-
-    //if(i<50) console.log("i : "+i," radius : "+radius," spinAngle : "+spinAngle," branchAngle : "+branchAngle," x : "+Math.cos(branchAngle + spinAngle) * radius," z : "+Math.sin(branchAngle + spinAngle) * radius);
-  }
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-
-  /**
-   * Material
-   */
-  material = new THREE.PointsMaterial({
-    size: parameters.size,
-    sizeAttenuation: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    color: "red"
-  })
-
-  /**
-   * Points
-   */
-  points = new THREE.Points(geometry, material)
-  scene.add(points)
-
+const pointsData = {
+  counts : 10000
 }
 
-generateGalaxy()
+const positions = new Float32Array(pointsData.counts * 3);
+function setPointsGeoAttribute(){
+  for (let i = 0; i < pointsData.counts; i++) {
+    const i3 = i * 3;
+    positions[i3] = Math.random();
+    positions[i3 + 1] = Math.random();
+    positions[i3 + 2] = Math.random();
+  }
 
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+}
 
-gui.add(parameters, 'count').min(100).max(100000).step(100).onFinishChange(generateGalaxy)
-gui.add(parameters, 'size').min(0.001).max(0.1).step(0.001).onFinishChange(generateGalaxy)
-gui.add(parameters, 'radius').min(0.01).max(20).step(0.01).onFinishChange(generateGalaxy)
-gui.add(parameters, 'branches').min(2).max(20).step(1).onFinishChange(generateGalaxy)
-gui.add(parameters, 'spin').min(- 5).max(5).step(0.001).onFinishChange(generateGalaxy)
-gui.add(parameters, 'randomness').min(0).max(2).step(0.001).onFinishChange(generateGalaxy)
+const material = new THREE.PointsMaterial({
+  color: "red",
+  size: 0.1
+})
+const points = new THREE.Points(geometry,material);
+scene.add(points)
 
 //lights
-const ambient = new THREE.AmbientLight(0xffffff, 1);
-scene.add(ambient);
+const ambientLight = new THREE.AmbientLight("red", 1);
+scene.add(ambientLight)
 
-//controls setup
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
+//camera setup
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(5,5,5);
+scene.add(camera);
 
-//axis helper
-const axisHelper = new THREE.AxesHelper();
-axisHelper.setColors("red", "yellow", "blue")//x, y, z
-scene.add(axisHelper)
+//renderer setup
+const renderer = new THREE.WebGLRenderer();
+document.body.appendChild(renderer.domElement)
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setAnimationLoop(animation)
+console.log(renderer);
 
-//animation loop
+//controls
+const controls = new OrbitControls(camera, renderer.domElement)
+
+//animation
 const timer = new Timer();
-function animate() {
+console.log(timer);
 
-  // Timer
-  timer.update()
-  const elapsedTime = timer.getElapsed() * 0.2;
+function animation(){
+  //timer
+  timer.update();
+  const elapsedTime = timer.getElapsed();
+  // console.log(elapsedTime);
+  
+  
 
-  controls.update();
+  //render
   renderer.render(scene, camera);
+
+  requestAnimationFrame(animation)
 }
 
-//handle window resize
+
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+  camera.aspect = window.innerWidth / window.innerHeight
+  camera.updateProjectionMatrix()
   renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-
+  
+})
