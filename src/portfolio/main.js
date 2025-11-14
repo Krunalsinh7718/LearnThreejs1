@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { GUI } from "lil-gui";
 import { Timer } from "../common/Timer.js"
+import { gsap } from "gsap";
 
 //gui setup
 const gui = new GUI();
@@ -11,7 +12,8 @@ const parameters = {
 }
 
 gui.addColor(parameters, 'materialColor').onChange(() => {
-  material.color.set(parameters.materialColor)
+   material.color.set(parameters.materialColor)
+        particlesMaterial.color.set(parameters.materialColor)
 })
 
 // Texture
@@ -58,6 +60,35 @@ mesh3.position.x = 2
 scene.add(mesh1, mesh2, mesh3)
 
 const sectionMeshes = [mesh1, mesh2, mesh3]
+
+/**
+ * Particles
+ */
+// Geometry
+const particlesCount = 200
+const positions = new Float32Array(particlesCount * 3)
+
+for(let i = 0; i < particlesCount; i++)
+{
+    positions[i * 3 + 0] = (Math.random() - 0.5) * 10
+    positions[i * 3 + 1] = objectsDistance * 0.5 - Math.random() * objectsDistance * sectionMeshes.length
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 10
+}
+
+const particlesGeometry = new THREE.BufferGeometry()
+particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+// Material
+const particlesMaterial = new THREE.PointsMaterial({
+    color: parameters.materialColor,
+    sizeAttenuation: true,
+    size: 0.03
+})
+
+// Points
+const particles = new THREE.Points(particlesGeometry, particlesMaterial)
+scene.add(particles)
+
 /**
  * Lights
  */
@@ -65,13 +96,21 @@ const directionalLight = new THREE.DirectionalLight('#ffffff', 3)
 directionalLight.position.set(1, 1, 0)
 scene.add(directionalLight)
 
-//camera setup
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 6);
-scene.add(camera);
+/**
+ * Camera
+ */
+// Group
+const cameraGroup = new THREE.Group()
+scene.add(cameraGroup)
+
+// Base camera
+const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 100)
+camera.position.z = 6
+cameraGroup.add(camera)
 
 //renderer setup
 const renderer = new THREE.WebGLRenderer({ alpha: true });
+renderer.setClearAlpha(0);
 renderer.domElement.classList.add('webgl');
 document.body.appendChild(renderer.domElement)
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -79,29 +118,31 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.setAnimationLoop(animation)
 
 //animation
-const timer = new Timer();
+const clock = new THREE.Clock()
+let previousTime = 0
 
 function animation() {
   //timer
-  timer.update();
-  const elapsedTime = timer.getElapsed();
+  const elapsedTime = clock.getElapsedTime()
+    const deltaTime = elapsedTime - previousTime
+    previousTime = elapsedTime
   // Animate camera
   camera.position.y = -scrollY / window.innerHeight * objectsDistance;
 
-  const parallaxX = cursor.x
-  const parallaxY = -cursor.y
-  camera.position.x = parallaxX
-  camera.position.y = parallaxY
+  const parallaxX = cursor.x * 0.5
+    const parallaxY = - cursor.y * 0.5
+  cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * 5 * deltaTime
+    cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * 5 * deltaTime
 
   // Animate meshes
-  for (const mesh of sectionMeshes) {
-    mesh.rotation.x = elapsedTime * 0.1
-    mesh.rotation.y = elapsedTime * 0.12
-  }
+  for(const mesh of sectionMeshes)
+    {
+        mesh.rotation.x += deltaTime * 0.1
+        mesh.rotation.y += deltaTime * 0.12
+    }
 
   //render
   renderer.render(scene, camera);
-  requestAnimationFrame(animation)
 }
 /**
  * Cursor
@@ -114,19 +155,35 @@ window.addEventListener('mousemove', (event) => {
   cursor.x = event.clientX / window.innerWidth - 0.5
   cursor.y = event.clientY / window.innerHeight - 0.5
 
-  console.log(cursor)
+  // console.log(cursor)
 })
 
 /**
  * Scroll
  */
 let scrollY = window.scrollY
-window.addEventListener('scroll', () => {
-  scrollY = window.scrollY
+let currentSection = 0
+window.addEventListener('scroll', () =>
+{
+    scrollY = window.scrollY
+    const newSection = Math.round(scrollY / window.innerHeight)
 
-  // console.log(scrollY)
+      if(newSection != currentSection)
+    {
+        // ...
+
+        gsap.to(
+            sectionMeshes[currentSection].rotation,
+            {
+                duration: 1.5,
+                ease: 'power2.inOut',
+                 x: '+=6',
+                y: '+=3',
+                z: '+=1.5'
+            }
+        )
+    }
 })
-
 /**
  * resize
  */
