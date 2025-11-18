@@ -1,0 +1,28 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+/* html,body{
+    overflow: hidden;
+} */
+body{
+    background-color: #010101;
+}
+.webgl{
+    position: fixed;
+    z-index: -1;
+    left: 0;
+    top: 0;
+}
+section{
+    height: 100vh;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 50px 100px;
+    &:nth-child(odd){
+        justify-content: flex-end;
+    }
+}
