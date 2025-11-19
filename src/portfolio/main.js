@@ -1,189 +1,286 @@
 import * as THREE from "three";
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import GUI from "lil-gui";
-import gsap from 'gsap';
+import gsap from "gsap";
+import { SplitText } from "https://cdn.skypack.dev/gsap/SplitText"
 
-//gui
-const gui = new GUI();
 
-const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight
+/*=============================================
+=            common variables            =
+=============================================*/
+const parameters = {
+    canvasWidth: window.innerWidth,
+    canvasHeight: window.innerHeight,
+    color: "#90da8b"
 }
 
-//texture loader
+/*=============================================
+=            GUI setup            =
+=============================================*/
+const gui = new GUI();
+
+/*=============================================
+=            texture setup            =
+=============================================*/
 const textureLoader = new THREE.TextureLoader();
+
 const texture1 = textureLoader.load("./assets/gradients/3.jpg");
 texture1.magFilter = THREE.NearestFilter;
 
-//scene setup
+/*=============================================
+=            Scene setup            =
+=============================================*/
 const scene = new THREE.Scene();
 
-//renderer setup
-const renderer = new THREE.WebGLRenderer();
-renderer.domElement.classList.add('webgl');
-renderer.setClearAlpha(0);
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
-renderer.setAnimationLoop(animation);
-document.body.appendChild(renderer.domElement);
 
-//camera setup
-const cameraGroup = new THREE.Group()
+/*=============================================
+=            Camera setup            =
+=============================================*/
+const cameraGroup = new THREE.Group();
+const camera = new THREE.PerspectiveCamera(35, parameters.canvasWidth / parameters.canvasHeight, 0.01, 1000);
+camera.position.z = 6
+cameraGroup.add(camera)
 scene.add(cameraGroup)
 
-const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 1000);
-camera.position.z = 6
-cameraGroup.add(camera);
+
+/*=============================================
+=            renderer setup            =
+=============================================*/
+const renderer = new THREE.WebGLRenderer();
+renderer.domElement.classList.add('webgl')
+renderer.setSize(parameters.canvasWidth, parameters.canvasHeight)
+renderer.setAnimationLoop(animation)
+renderer.setClearAlpha(0);
+document.body.appendChild(renderer.domElement)
 
 
-/**
- * Lights
- */
-const directionalLight = new THREE.DirectionalLight('#ffffff', 3)
-directionalLight.position.set(1, 1, 0)
-scene.add(directionalLight)
 
-//mesh
-const parameters = {
-  materialColor: "red",
-}
-const material = new THREE.MeshToonMaterial({
-  color: parameters.materialColor,
-  gradientMap: texture1
+/*=============================================
+=            Mesh            =
+=============================================*/
+const objectDistance = 4;
+const objectDistanceX = 2;
+
+const material1 = new THREE.MeshToonMaterial({
+    gradientMap: texture1,
+    color: parameters.color,
+    transparent: true
+});
+const material2 = new THREE.MeshToonMaterial({
+    gradientMap: texture1,
+    color: parameters.color,
+    transparent: true
+});
+const material3 = new THREE.MeshToonMaterial({
+    gradientMap: texture1,
+    color: parameters.color,
+    transparent: true
+});
+
+gui.addColor(parameters, "color").onChange(e => {
+    material1.color.set(parameters.color)
+    material2.color.set(parameters.color)
+    material3.color.set(parameters.color)
+
+    console.log(parameters.color);
+    
 })
-
-const objectsDistance = 4
 
 const mesh1 = new THREE.Mesh(
-  new THREE.TorusGeometry(1, 0.4, 16, 60),
-  material
+    new THREE.TorusKnotGeometry(0.7, 0.25, 200, 200),
+    material1
 )
-mesh1.scale.set(0.5, 0.5, 0.5)
+mesh1.scale.set(0.7, 0.7, 0.7)
 
 const mesh2 = new THREE.Mesh(
-  new THREE.ConeGeometry(1, 2, 32),
-  material
+    new THREE.ConeGeometry(1, 2, 60, 60, false),
+    material2
 )
-// mesh2.visible = false;
+mesh2.scale.set(0.7, 0.7, 0.7)
 
 const mesh3 = new THREE.Mesh(
-  new THREE.TorusKnotGeometry(0.8, 0.35, 100, 16),
-  material
+    new THREE.TorusGeometry(0.7, 0.3, 100, 150),
+    material3
 )
-mesh3.scale.set(0.5, 0.5, 0.5)
+mesh3.scale.set(0.7, 0.7, 0.7)
+
+mesh1.position.y = objectDistance * 0;
+mesh2.position.y = objectDistance * -1;
+mesh3.position.y = objectDistance * -2;
+
+mesh1.position.x = objectDistanceX;
+mesh2.position.x = -objectDistanceX;
+mesh3.position.x = objectDistanceX;
+
+scene.add(mesh1, mesh2, mesh3);
+
+const sectionMeshes = [mesh1, mesh2, mesh3];
 
 
-mesh1.position.y = - objectsDistance * 0
-mesh2.position.y = - objectsDistance * 1
-mesh3.position.y = - objectsDistance * 2
+const bufferGeometry = new THREE.BufferGeometry();
+const counts = 200;
+const positions = new Float32Array(counts * 3);
 
-mesh1.position.x = 2
-mesh2.position.x = - 2
-mesh3.position.x = 2
-
-scene.add(mesh1, mesh2, mesh3)
-
-const sectionMeshes = [mesh1, mesh2, mesh3]
-
-gui.addColor(parameters, 'materialColor').onChange(() => {
-  material.color.set(parameters.materialColor)
-  pointsMaterial.color.set(parameters.materialColor)
-})
-
-
-//particles
-const particlesCount = 200
-const positions = new Float32Array(particlesCount * 3);
-
-for (let i = 0; i < particlesCount; i++) {
-  positions[i * 3 + 0] = (Math.random() - 0.5) * 10
-  positions[i * 3 + 1] = objectsDistance * 0.5 - Math.random() * objectsDistance * sectionMeshes.length
-  positions[i * 3 + 2] = (Math.random() - 0.5) * 10
+for (let i = 0; i < counts; i++) {
+    const i3 = i * 3;
+    positions[i3] = (Math.random() - 0.5) * 10;
+    positions[i3 + 1] = - Math.random() * (objectDistance * sectionMeshes.length) + 2;
+    positions[i3 + 2] = (Math.random() - 0.5) * 10;
 }
 
-const particleGeometry = new THREE.BufferGeometry();
-particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-
+bufferGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 const pointsMaterial = new THREE.PointsMaterial({
-  color: parameters.materialColor,
-  sizeAttenuation: true,
-  size: 0.02
+    size: 0.02,
+    color: parameters.color
 })
-const particlesMesh = new THREE.Points(particleGeometry, pointsMaterial);
-scene.add(particlesMesh)
+const points = new THREE.Points(bufferGeometry, pointsMaterial);
+scene.add(points)
 
+/*=============================================
+=            lights            =
+=============================================*/
+const directionLight = new THREE.DirectionalLight("#eee", 4);
+directionLight.position.set(0, 1, 1)
+scene.add(directionLight);
 
-//animation loop setup
+const lightCameraHelper = new THREE.DirectionalLightHelper(directionLight)
+// scene.add(lightCameraHelper)
+
+// gui.add(directionLight.position,"x").min(0).max(6).step(0.1)
+// gui.add(directionLight.position,"y").min(0).max(6).step(0.1)
+// gui.add(directionLight.position,"z").min(0).max(6).step(0.1)
+// gui.add(directionLight,"intensity").min(0).max(6).step(0.1)
+
+/*=============================================
+=            animation loop            =
+=============================================*/
 const clock = new THREE.Clock();
-let previousTime = 0
-
+let previousTime = 0;
 function animation() {
 
-  const elapsedTime = clock.getElapsedTime();
-  const deltaTime = elapsedTime - previousTime;
-  previousTime = elapsedTime;
+    //elapsed time
+    const elapsedTime = clock.getElapsedTime();
+    const deltaTime = elapsedTime - previousTime;
+    previousTime = elapsedTime;
 
-  camera.position.y = -scrollY / sizes.height * objectsDistance
-  const parallaxX = cursor.x * 0.5
-  const parallaxY = -cursor.y * 0.5
-  cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * 5 * deltaTime;
-  cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * 5 * deltaTime;
+    // console.log(deltaTime);
 
-  for (const mesh of sectionMeshes) {
-    mesh.rotation.x += deltaTime * 0.1
-    mesh.rotation.y += deltaTime * 0.12
-  }
-  renderer.render(scene, camera)
+
+    camera.position.y = -scrollY / parameters.canvasHeight * objectDistance;
+    const parallaxX = mouse.x * 0.5;
+    const parallaxY = -mouse.y * 0.5;
+    cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * 5 * deltaTime;
+    cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * 5 * deltaTime;
+
+    for (const mesh of sectionMeshes) {
+        mesh.rotation.x += deltaTime * 0.1
+        mesh.rotation.y += deltaTime * 0.12
+
+        // mesh.position.x = mesh.position.x - (mouse.x)
+    }
+
+    points.rotation.y = elapsedTime * 0.01
+
+    renderer.render(scene, camera)
 }
 
-/* 
- * Events 
- */
 
-//mousemove
-const cursor = {
-  x: 0,
-  y: 0
+/*=============================================
+=            Events setup            =
+=============================================*/
+let mouse = {
+    x: 0,
+    y: 0
 }
-window.addEventListener("mousemove", e => {
-  cursor.x = e.clientX / sizes.width - 0.5;
-  cursor.y = e.clientY / sizes.height - 0.5;
+
+window.addEventListener('mousemove', e => {
+    mouse.x = e.clientX / parameters.canvasWidth - 0.5;
+    mouse.y = e.clientY / parameters.canvasHeight - 0.5;
+    //    console.log(mouse);
+
 })
 
-//scroll
-let scrollY = window.screenY;
+
+window.addEventListener('resize', e => {
+    parameters.canvasWidth = window.innerWidth;
+    parameters.canvasHeight = window.innerHeight;
+    renderer.setSize(parameters.canvasWidth, parameters.canvasHeight)
+
+    camera.aspect = parameters.canvasWidth / parameters.canvasHeight;
+    camera.updateProjectionMatrix();
+})
+
+let scrollY = window.scrollY;
 let currentSection = 0;
+const textElements = document.querySelectorAll("section h2");
 
 window.addEventListener('scroll', e => {
-  scrollY = window.scrollY
-   const newSection = Math.round(scrollY / sizes.height);
+    scrollY = window.scrollY;
+    let newSection = Math.round(scrollY / parameters.canvasHeight);
 
-   if(currentSection != newSection){
-    currentSection = newSection;
-    // console.log('changed', currentSection)
-     gsap.to(
-            sectionMeshes[currentSection].rotation,
-            {
-                duration: 1.5,
-                ease: 'power2.inOut',
-                x: '+=6',
-                y: '+=3',
-                z: '+=1.5'
-            }
-        )
-   }
-   
+
+    if (currentSection != newSection) {
+        currentSection = newSection;
+        gsap.to(sectionMeshes[currentSection].rotation, {
+            x: '+=6',
+            y: '+=3',
+            z: '+=1.5',
+            duration: 1.5
+        })
+
+        let split = SplitText.create(textElements[currentSection], { type: "words, chars" });
+
+        gsap.from(split.chars, {
+            duration: 0.5,
+            x: currentSection % 2 === 0 ? -100 : 100,       // animate from 100px below
+            autoAlpha: 0, // fade in from opacity: 0 and visibility: hidden
+            stagger: 0.05 // 0.05 seconds between each
+        });
+    }
 })
 
-//resize
-window.addEventListener('resize', e => {
-  sizes.width = window.innerWidth;
-  sizes.height = window.innerHeight;
+//144,218,139
+//255,190,51
 
-  renderer.setSize(sizes.width, sizes.height);
-  camera.aspect = sizes.width / sizes.height;
-  camera.updateProjectionMatrix();
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
 
+
+const maxColor = 255;
+textElements.forEach( (e,i) => {
+
+    e.addEventListener("mouseenter", e => {
+        gsap.to(sectionMeshes[i].material.color, {
+            r: 255/maxColor,
+            g: 190/maxColor,
+            b: 51/maxColor,
+            duration: 1.5
+        })
+    })
+    e.addEventListener("mouseleave", e => {
+        const rgbColor = hexToRgb(parameters.color);
+         gsap.to(sectionMeshes[i].material.color, {
+            r: rgbColor.r,
+            g: rgbColor.g,
+            b: rgbColor.b,
+            duration: 1.5
+        })
+    })
 })
+
+
+
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16) / 255,
+    g: parseInt(result[2], 16) / 255,
+    b: parseInt(result[3], 16) / 255
+  } : null;
+}
+
+
+
+
+
+
+
+
+
