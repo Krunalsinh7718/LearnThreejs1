@@ -3,6 +3,7 @@ import GUI from "lil-gui";
 import gsap from "gsap";
 import { SplitText } from "https://cdn.skypack.dev/gsap/SplitText";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
+import * as CANNON from "cannon-es"
 
 
 /*=============================================
