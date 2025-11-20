@@ -6,6 +6,7 @@
     "deploy": "vercel --prod"
   },
   "dependencies": {
+    "cannon-es": "^0.15.1",
     "gsap": "^3.13.0",
     "three": "^0.180.0",
     "vercel": "^48.8.2"
