@@ -10,15 +10,32 @@ import * as CANNON from "cannon-es"
 =            common variables            =
 =============================================*/
 const parameters = {
-    canvasWidth: window.innerWidth,
-    canvasHeight: window.innerHeight,
-    color: "#90da8b"
+  canvasWidth: window.innerWidth,
+  canvasHeight: window.innerHeight,
+  color: "#90da8b",
+  createSphereShape: function(){
+
+    const radius = Math.max(Math.min(Math.random(), 0.5), 0.1);
+    const position = {x : Math.random() * 2, y : 6, z : Math.random() * 2}
+    createSphear(radius, position)
+  },
+  createBoxShape : function(){
+    const size = {
+      h : Math.random(),
+      w : Math.random(),
+      d : Math.random()
+    }
+    const position = {x : Math.random() * 2, y : 6, z : Math.random() * 2};
+    createBox(size, position)
+  }
 }
 
 /*=============================================
 =            GUI setup            =
 =============================================*/
 const gui = new GUI();
+gui.add(parameters, "createSphereShape" )
+gui.add(parameters, "createBoxShape" )
 
 /*=============================================
 =            texture setup            =
@@ -41,19 +58,38 @@ const textureLoader = new THREE.TextureLoader(lodingManager);
 const cubeTextureLoader = new THREE.CubeTextureLoader(lodingManager)
 
 const environmentMapTexture = cubeTextureLoader.load([
-    './assets/textures/environmentMaps/0/px.png',
-    './assets/textures/environmentMaps/0/nx.png',
-    './assets/textures/environmentMaps/0/py.png',
-    './assets/textures/environmentMaps/0/ny.png',
-    './assets/textures/environmentMaps/0/pz.png',
-    './assets/textures/environmentMaps/0/nz.png'
+  './assets/textures/environmentMaps/0/px.png',
+  './assets/textures/environmentMaps/0/nx.png',
+  './assets/textures/environmentMaps/0/py.png',
+  './assets/textures/environmentMaps/0/ny.png',
+  './assets/textures/environmentMaps/0/pz.png',
+  './assets/textures/environmentMaps/0/nz.png'
 ])
 
 /*=============================================
-=            Scene setup            =
+=            Scene and world setup            =
 =============================================*/
 const scene = new THREE.Scene();
 
+const world = new CANNON.World({
+  gravity: { x: 0, y: -9.82, z: 0 },
+})
+world.broadphase = new CANNON.SAPBroadphase(world);
+world.allowSleep = true;
+
+/*=============================================
+=            world material            =
+=============================================*/
+const defaultMaterial = new CANNON.Material('default');
+const defaultContactMaterial = new CANNON.ContactMaterial(
+  defaultMaterial,
+  defaultMaterial,
+  {
+    friction: 0.1,
+    restitution: 0.3
+  }
+)
+world.defaultContactMaterial = defaultContactMaterial;
 
 /*=============================================
 =            Camera setup            =
@@ -83,41 +119,99 @@ controls.enableDamping = true
 
 
 /*=============================================
-=            Mesh            =
+=           create mesh and body         =
 =============================================*/
 
-/**
- * Test sphere
- */
-const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 32, 32),
-    new THREE.MeshStandardMaterial({
-        metalness: 0.3,
-        roughness: 0.4,
-        envMap: environmentMapTexture,
-        envMapIntensity: 0.5
-    })
-)
-sphere.castShadow = true
-sphere.position.y = 0.5
-scene.add(sphere)
+const objectsToUpdate = [];
 
-/**
- * Floor
- */
+
+const sphereGeo = new THREE.SphereGeometry(1, 32, 32);
+const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+const material = new THREE.MeshStandardMaterial({
+  metalness: 0.3,
+  roughness: 0.4,
+  envMap: environmentMapTexture,
+  envMapIntensity: 0.5
+})
+const createSphear = (radius, position) => {
+  const mesh = new THREE.Mesh(sphereGeo, material);
+  mesh.scale.set(radius, radius, radius);
+  mesh.position.copy(position)
+  scene.add(mesh)
+
+  const shape = new CANNON.Sphere(radius);
+  const body = new CANNON.Body({
+    mass: 1,
+    shape: shape,
+  })
+  body.position.copy(position)
+  world.addBody(body)
+
+  objectsToUpdate.push({
+    mesh: mesh,
+    body: body,
+    copyBodyPosToMesh() {
+      this.mesh.position.copy(this.body.position);
+    }
+  })
+}
+
+const createBox = (size, position) => {
+  const mesh = new THREE.Mesh(boxGeo, material);
+  mesh.scale.set(size.h, size.w, size.d);
+  mesh.position.copy(position)
+  scene.add(mesh)
+
+  const shape = new CANNON.Box(new CANNON.Vec3(
+    size.h * 0.5, 
+    size.w * 0.5, 
+    size.d * 0.5
+  ))
+  const body = new CANNON.Body({
+    mass: 1,
+    shape: shape,
+  })
+  body.position.copy(position)
+  world.addBody(body)
+
+  objectsToUpdate.push({
+    mesh: mesh,
+    body: body,
+    copyBodyPosToMesh() {
+      this.mesh.position.copy(this.body.position);
+      this.mesh.quaternion.copy(this.body.quaternion)
+    }
+  })
+}
+
+
+/*=============================================
+=            floor            =
+=============================================*/
 const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 10),
-    new THREE.MeshStandardMaterial({
-        color: '#777777',
-        metalness: 0.3,
-        roughness: 0.4,
-        envMap: environmentMapTexture,
-        envMapIntensity: 0.5
-    })
+  new THREE.PlaneGeometry(10, 10),
+  new THREE.MeshStandardMaterial({
+    color: '#777777',
+    metalness: 0.3,
+    roughness: 0.4,
+    envMap: environmentMapTexture,
+    envMapIntensity: 0.5
+  })
 )
 floor.receiveShadow = true
 floor.rotation.x = - Math.PI * 0.5
 scene.add(floor)
+
+const floorShape = new CANNON.Plane();
+const floorBody = new CANNON.Body({
+  mass: 0,
+  shape: floorShape
+})
+floorBody.quaternion.setFromAxisAngle(
+  new CANNON.Vec3(-1, 0, 0),
+  Math.PI * 0.5
+)
+world.addBody(floorBody)
 
 /*=============================================
 =            lights            =
@@ -143,16 +237,24 @@ const clock = new THREE.Clock();
 let previousTime = 0;
 function animation() {
 
-    //elapsed time
-    const elapsedTime = clock.getElapsedTime();
-    const deltaTime = elapsedTime - previousTime;
-    previousTime = elapsedTime;
+  //elapsed time
+  const elapsedTime = clock.getElapsedTime();
+  const deltaTime = elapsedTime - previousTime;
+  previousTime = elapsedTime;
 
-    // Update controls
-    controls.update()
+  // Update controls
+  controls.update()
 
-    // Render
-    renderer.render(scene, camera)
+  //update shape position
+  for(const shape of objectsToUpdate){
+    shape.copyBodyPosToMesh()
+  }
+
+  //update world
+  world.step(1 / 60, deltaTime, 3);
+
+  // Render
+  renderer.render(scene, camera)
 }
 
 
@@ -160,14 +262,14 @@ function animation() {
 =            Events setup            =
 =============================================*/
 window.addEventListener('resize', e => {
-    parameters.canvasWidth = window.innerWidth;
-    parameters.canvasHeight = window.innerHeight;
+  parameters.canvasWidth = window.innerWidth;
+  parameters.canvasHeight = window.innerHeight;
 
-    renderer.setSize(parameters.canvasWidth, parameters.canvasHeight)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer.setSize(parameters.canvasWidth, parameters.canvasHeight)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
-    camera.aspect = parameters.canvasWidth / parameters.canvasHeight;
-    camera.updateProjectionMatrix();
+  camera.aspect = parameters.canvasWidth / parameters.canvasHeight;
+  camera.updateProjectionMatrix();
 })
 
 
