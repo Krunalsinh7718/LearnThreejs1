@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import GUI from "lil-gui";
 import gsap from "gsap";
-import { SplitText } from "https://cdn.skypack.dev/gsap/SplitText";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import * as CANNON from "cannon-es"
 
@@ -13,20 +12,31 @@ const parameters = {
   canvasWidth: window.innerWidth,
   canvasHeight: window.innerHeight,
   color: "#90da8b",
-  createSphereShape: function(){
+  createSphereShape: function () {
 
     const radius = Math.max(Math.min(Math.random(), 0.5), 0.1);
-    const position = {x : Math.random() * 2, y : 6, z : Math.random() * 2}
+    const position = { x: (Math.random() - 0.5) * 3, y: 6, z: (Math.random() - 0.5) * 3 }
     createSphear(radius, position)
   },
-  createBoxShape : function(){
+  createBoxShape: function () {
     const size = {
-      h : Math.random(),
-      w : Math.random(),
-      d : Math.random()
+      h: Math.random(),
+      w: Math.random(),
+      d: Math.random()
     }
-    const position = {x : Math.random() * 2, y : 6, z : Math.random() * 2};
+    const position = { x: (Math.random() - 0.5) * 3, y: 6, z: (Math.random() - 0.5) * 3 };
     createBox(size, position)
+  },
+  reset: function () {
+    for (const object of objectsToUpdate) {
+      // Remove body
+      object.body.removeEventListener('collide', playSound)
+      world.removeBody(object.body)
+
+      // Remove mesh
+      scene.remove(object.mesh)
+    }
+    objectsToUpdate.splice(0, objectsToUpdate.length)
   }
 }
 
@@ -34,8 +44,9 @@ const parameters = {
 =            GUI setup            =
 =============================================*/
 const gui = new GUI();
-gui.add(parameters, "createSphereShape" )
-gui.add(parameters, "createBoxShape" )
+gui.add(parameters, "createSphereShape")
+gui.add(parameters, "createBoxShape")
+gui.add(parameters, "reset")
 
 /*=============================================
 =            texture setup            =
@@ -66,6 +77,21 @@ const environmentMapTexture = cubeTextureLoader.load([
   './assets/textures/environmentMaps/0/nz.png'
 ])
 
+
+/*=============================================
+=            play sound            =
+=============================================*/
+const hitSound = new Audio("./assets/sounds/hit.mp3");
+const playSound = (collision) => {
+  const impactStrength = collision.contact.getImpactVelocityAlongNormal();
+
+  if (impactStrength > 1.5) {
+    hitSound.volume = Math.min(impactStrength * 0.1, 1);
+    hitSound.currentTime = 0
+    hitSound.play();
+  }
+}
+
 /*=============================================
 =            Scene and world setup            =
 =============================================*/
@@ -95,7 +121,7 @@ world.defaultContactMaterial = defaultContactMaterial;
 =            Camera setup            =
 =============================================*/
 const camera = new THREE.PerspectiveCamera(75, parameters.canvasWidth / parameters.canvasHeight, 0.1, 100)
-camera.position.set(- 3, 3, 3)
+camera.position.set(5, 5, 10)
 scene.add(camera)
 
 
@@ -121,7 +147,9 @@ controls.enableDamping = true
 /*=============================================
 =           create mesh and body         =
 =============================================*/
-
+const GROUP1 = 1;
+const GROUP2 = 2;
+const GROUP3 = 4;
 const objectsToUpdate = [];
 
 
@@ -143,8 +171,21 @@ const createSphear = (radius, position) => {
   const body = new CANNON.Body({
     mass: 1,
     shape: shape,
+    collisionFilterGroup: GROUP2, // Put the box in group 2
+    collisionFilterMask:  GROUP2 | GROUP1// It can only collide with group 1 (the sphere)
   })
+  body.addEventListener('collide', playSound)
   body.position.copy(position)
+
+  const forceX = (Math.random() - 0.5) * 150 + 100;
+  const forceY = 0;
+  const forceZ = (Math.random() - 0.5) * 150 + 100;
+
+
+  body.applyLocalForce(
+    new CANNON.Vec3(forceX, forceY, forceZ),
+    new CANNON.Vec3(0, 0, 0)
+  )
   world.addBody(body)
 
   objectsToUpdate.push({
@@ -163,15 +204,33 @@ const createBox = (size, position) => {
   scene.add(mesh)
 
   const shape = new CANNON.Box(new CANNON.Vec3(
-    size.h * 0.5, 
-    size.w * 0.5, 
+    size.h * 0.5,
+    size.w * 0.5,
     size.d * 0.5
   ))
   const body = new CANNON.Body({
     mass: 1,
     shape: shape,
+    collisionFilterGroup: GROUP3, // Put the cylinder in group 3
+    collisionFilterMask:  GROUP3 | GROUP1
   })
+  // console.log(body);
+
+
+  body.addEventListener('collide', playSound)
   body.position.copy(position)
+
+  const forceX = (Math.random() - 0.5) * 150 + 100;
+  const forceY = 0;
+  const forceZ = (Math.random() - 0.5) * 150 + 100;
+
+
+  body.applyLocalForce(
+    new CANNON.Vec3(forceX, forceY, forceZ),
+    new CANNON.Vec3(0, 0, 0)
+  )
+
+
   world.addBody(body)
 
   objectsToUpdate.push({
@@ -183,6 +242,8 @@ const createBox = (size, position) => {
     }
   })
 }
+
+
 
 
 /*=============================================
@@ -205,7 +266,9 @@ scene.add(floor)
 const floorShape = new CANNON.Plane();
 const floorBody = new CANNON.Body({
   mass: 0,
-  shape: floorShape
+  shape: floorShape,
+  collisionFilterGroup: GROUP1, 
+  collisionFilterMask: GROUP1 | GROUP2 | GROUP3, 
 })
 floorBody.quaternion.setFromAxisAngle(
   new CANNON.Vec3(-1, 0, 0),
@@ -246,7 +309,7 @@ function animation() {
   controls.update()
 
   //update shape position
-  for(const shape of objectsToUpdate){
+  for (const shape of objectsToUpdate) {
     shape.copyBodyPosToMesh()
   }
 
