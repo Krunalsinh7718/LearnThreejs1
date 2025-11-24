@@ -177,12 +177,18 @@ const createSphear = (radius, position) => {
   body.addEventListener('collide', playSound)
   body.position.copy(position)
 
-  const forceX = (Math.random() - 0.5) * 150 + 100;
+  // const forceX = (Math.random() - 0.5) * 150 + 100;
+  // const forceY = 0;
+  // const forceZ = (Math.random() - 0.5) * 150 + 100;
+
+    const forceX = (Math.random() - 0.5) * 2  * 300 ;
   const forceY = 0;
-  const forceZ = (Math.random() - 0.5) * 150 + 100;
+  const forceZ =  (Math.random() - 0.5) * 2  * 300 ;
+  console.log(forceZ);
+  
 
 
-  body.applyLocalForce(
+  body.applyForce(
     new CANNON.Vec3(forceX, forceY, forceZ),
     new CANNON.Vec3(0, 0, 0)
   )
@@ -294,6 +300,11 @@ directionalLight.position.set(5, 5, 5)
 scene.add(directionalLight)
 
 /*=============================================
+=           axis helper            =
+=============================================*/
+const axisHelper = new THREE.AxesHelper();
+scene.add(axisHelper)
+/*=============================================
 =            animation loop            =
 =============================================*/
 const clock = new THREE.Clock();
@@ -312,6 +323,9 @@ function animation() {
   for (const shape of objectsToUpdate) {
     shape.copyBodyPosToMesh()
   }
+
+  // console.log(camera.position);
+  
 
   //update world
   world.step(1 / 60, deltaTime, 3);
