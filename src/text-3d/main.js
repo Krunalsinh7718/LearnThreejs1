@@ -40,8 +40,8 @@ lodingManager.onError = (url) => {
 };
 
 const textureLoader = new THREE.TextureLoader(lodingManager);
-const matcapTexture1 = textureLoader.load('./assets/textures/matcaps/4.png');
-const matcapTexture2 = textureLoader.load('./assets/textures/matcaps/8.png');
+const matcapTexture1 = textureLoader.load('/images/matcaps/4.png');
+const matcapTexture2 = textureLoader.load('/images/matcaps/8.png');
 matcapTexture1.colorSpace = THREE.SRGBColorSpace
 
 const groupMain = new THREE.Group();

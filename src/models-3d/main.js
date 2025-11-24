@@ -25,11 +25,11 @@ const gui = new GUI();
 =            Models            =
 =============================================*/
 const dracoLoader = new DRACOLoader()
-dracoLoader.setDecoderPath('./assets/draco/')
+dracoLoader.setDecoderPath('/loaders/draco/')
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader)
 let mixer = null
-gltfLoader.load("./assets/Fox/glTF/Fox.gltf",
+gltfLoader.load("/models/Fox/glTF/Fox.gltf",
   (gltf) => {
     console.log(gltf);
     gltf.scene.scale.set(0.025, 0.025, 0.025)

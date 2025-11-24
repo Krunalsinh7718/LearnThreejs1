@@ -20,10 +20,10 @@ scene.add(camera);
  * Textures
  */
 const textureLoader = new THREE.TextureLoader()
-const bakedShadow = textureLoader.load('./textures/bakedShadow.png')
+const bakedShadow = textureLoader.load('/images/baked-shadow-textures/bakedShadow.png')
 bakedShadow.colorSpace = THREE.SRGBColorSpace
 
-const bakedShadow1 = textureLoader.load('./textures/bakedShadow1.jpg')
+const bakedShadow1 = textureLoader.load('/images/baked-shadow-textures/bakedShadow1.jpg')
 bakedShadow1.colorSpace = THREE.SRGBColorSpace
 
 /**

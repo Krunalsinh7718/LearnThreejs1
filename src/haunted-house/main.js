@@ -47,52 +47,52 @@ lodingManager.onError = (url) => {
 
 const textureLoader = new THREE.TextureLoader(lodingManager);
 // Floor
-const floorAlphaTexture = textureLoader.load('./assets/floor/alpha.webp')
-// const floorColorTexture = textureLoader.load('./assets/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_diff_1k.webp')
-// const floorARMTexture = textureLoader.load('./assets/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_arm_1k.webp')
-// const floorNormalTexture = textureLoader.load('./assets/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_nor_gl_1k.webp')
-// const floorDisplacementTexture = textureLoader.load('./assets/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_disp_1k.webp')
+const floorAlphaTexture = textureLoader.load('/images/haunted-house/floor/alpha.webp')
+// const floorColorTexture = textureLoader.load('/images/haunted-house/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_diff_1k.webp')
+// const floorARMTexture = textureLoader.load('/images/haunted-house/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_arm_1k.webp')
+// const floorNormalTexture = textureLoader.load('/images/haunted-house/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_nor_gl_1k.webp')
+// const floorDisplacementTexture = textureLoader.load('/images/haunted-house/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_disp_1k.webp')
 
-const floorColorTexture = textureLoader.load('./assets/floor/aerial_rocks_04_1k/aerial_rocks_04_diff_1k.webp')
-const floorARMTexture = textureLoader.load('./assets/floor/aerial_rocks_04_1k/aerial_rocks_04_arm_1k.webp')
-const floorNormalTexture = textureLoader.load('./assets/floor/aerial_rocks_04_1k/aerial_rocks_04_nor_gl_1k.webp')
-const floorDisplacementTexture = textureLoader.load('./assets/floor/aerial_rocks_04_1k/aerial_rocks_04_disp_1k.webp')
+const floorColorTexture = textureLoader.load('/images/haunted-house/floor/aerial_rocks_04_1k/aerial_rocks_04_diff_1k.webp')
+const floorARMTexture = textureLoader.load('/images/haunted-house/floor/aerial_rocks_04_1k/aerial_rocks_04_arm_1k.webp')
+const floorNormalTexture = textureLoader.load('/images/haunted-house/floor/aerial_rocks_04_1k/aerial_rocks_04_nor_gl_1k.webp')
+const floorDisplacementTexture = textureLoader.load('/images/haunted-house/floor/aerial_rocks_04_1k/aerial_rocks_04_disp_1k.webp')
 
 // Wall
-// const wallColorTexture = textureLoader.load('./assets/wall/castle_brick_broken_06_1k/castle_brick_broken_06_diff_1k.webp')
-// const wallARMTexture = textureLoader.load('./assets/wall/castle_brick_broken_06_1k/castle_brick_broken_06_arm_1k.webp')
-// const wallNormalTexture = textureLoader.load('./assets/wall/castle_brick_broken_06_1k/castle_brick_broken_06_nor_gl_1k.webp')
+// const wallColorTexture = textureLoader.load('/images/haunted-house/wall/castle_brick_broken_06_1k/castle_brick_broken_06_diff_1k.webp')
+// const wallARMTexture = textureLoader.load('/images/haunted-house/wall/castle_brick_broken_06_1k/castle_brick_broken_06_arm_1k.webp')
+// const wallNormalTexture = textureLoader.load('/images/haunted-house/wall/castle_brick_broken_06_1k/castle_brick_broken_06_nor_gl_1k.webp')
 
-const wallColorTexture = textureLoader.load('./assets/wall/rock_wall_15_1k/rock_wall_15_diff_1k.webp')
-const wallARMTexture = textureLoader.load('./assets/wall/rock_wall_15_1k/rock_wall_15_arm_1k.webp')
-const wallNormalTexture = textureLoader.load('./assets/wall/rock_wall_15_1k/rock_wall_15_nor_gl_1k.webp')
+const wallColorTexture = textureLoader.load('/images/haunted-house/wall/rock_wall_15_1k/rock_wall_15_diff_1k.webp')
+const wallARMTexture = textureLoader.load('/images/haunted-house/wall/rock_wall_15_1k/rock_wall_15_arm_1k.webp')
+const wallNormalTexture = textureLoader.load('/images/haunted-house/wall/rock_wall_15_1k/rock_wall_15_nor_gl_1k.webp')
 
 // Roof
-const roofColorTexture = textureLoader.load('./assets/roof/roof_slates_02_1k/roof_slates_02_diff_1k.webp')
-const roofARMTexture = textureLoader.load('./assets/roof/roof_slates_02_1k/roof_slates_02_arm_1k.webp')
-const roofNormalTexture = textureLoader.load('./assets/roof/roof_slates_02_1k/roof_slates_02_nor_gl_1k.webp')
+const roofColorTexture = textureLoader.load('/images/haunted-house/roof/roof_slates_02_1k/roof_slates_02_diff_1k.webp')
+const roofARMTexture = textureLoader.load('/images/haunted-house/roof/roof_slates_02_1k/roof_slates_02_arm_1k.webp')
+const roofNormalTexture = textureLoader.load('/images/haunted-house/roof/roof_slates_02_1k/roof_slates_02_nor_gl_1k.webp')
 
 // Bush
-const bushColorTexture = textureLoader.load('./assets/bush/leaves_forest_ground_1k/leaves_forest_ground_diff_1k.webp')
-const bushARMTexture = textureLoader.load('./assets/bush/leaves_forest_ground_1k/leaves_forest_ground_arm_1k.webp')
-const bushNormalTexture = textureLoader.load('./assets/bush/leaves_forest_ground_1k/leaves_forest_ground_nor_gl_1k.webp')
+const bushColorTexture = textureLoader.load('/images/haunted-house/bush/leaves_forest_ground_1k/leaves_forest_ground_diff_1k.webp')
+const bushARMTexture = textureLoader.load('/images/haunted-house/bush/leaves_forest_ground_1k/leaves_forest_ground_arm_1k.webp')
+const bushNormalTexture = textureLoader.load('/images/haunted-house/bush/leaves_forest_ground_1k/leaves_forest_ground_nor_gl_1k.webp')
 
 // Grave
-const graveColorTexture = textureLoader.load('./assets/grave/plastered_stone_wall_1k/plastered_stone_wall_diff_1k.webp')
-const graveARMTexture = textureLoader.load('./assets/grave/plastered_stone_wall_1k/plastered_stone_wall_arm_1k.webp')
-const graveNormalTexture = textureLoader.load('./assets/grave/plastered_stone_wall_1k/plastered_stone_wall_nor_gl_1k.webp')
+const graveColorTexture = textureLoader.load('/images/haunted-house/grave/plastered_stone_wall_1k/plastered_stone_wall_diff_1k.webp')
+const graveARMTexture = textureLoader.load('/images/haunted-house/grave/plastered_stone_wall_1k/plastered_stone_wall_arm_1k.webp')
+const graveNormalTexture = textureLoader.load('/images/haunted-house/grave/plastered_stone_wall_1k/plastered_stone_wall_nor_gl_1k.webp')
 
 // Door
-const doorColorTexture = textureLoader.load('./assets/door/color.webp')
-const doorAlphaTexture = textureLoader.load('./assets/door/alpha.webp')
-const doorAmbientOcclusionTexture = textureLoader.load('./assets/door/ambientOcclusion.webp')
-const doorHeightTexture = textureLoader.load('./assets/door/height.webp')
-const doorNormalTexture = textureLoader.load('./assets/door/normal.webp')
-const doorMetalnessTexture = textureLoader.load('./assets/door/metalness.webp')
-const doorRoughnessTexture = textureLoader.load('./assets/door/roughness.webp')
+const doorColorTexture = textureLoader.load('/images/haunted-house/door/color.webp')
+const doorAlphaTexture = textureLoader.load('/images/haunted-house/door/alpha.webp')
+const doorAmbientOcclusionTexture = textureLoader.load('/images/haunted-house/door/ambientOcclusion.webp')
+const doorHeightTexture = textureLoader.load('/images/haunted-house/door/height.webp')
+const doorNormalTexture = textureLoader.load('/images/haunted-house/door/normal.webp')
+const doorMetalnessTexture = textureLoader.load('/images/haunted-house/door/metalness.webp')
+const doorRoughnessTexture = textureLoader.load('/images/haunted-house/door/roughness.webp')
 
 // floating ghost
-const fGhostTexture = textureLoader.load('./assets/ghost/ghost.webp')
+const fGhostTexture = textureLoader.load('/images/haunted-house/ghost/ghost.webp')
 
 const textures = [
   { texture: floorColorTexture, repeatCount: { x: 8, y: 8 } },

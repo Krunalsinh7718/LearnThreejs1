@@ -24,7 +24,7 @@ lodingManager.onError = (url) => {
 };
 
 const textureLoader = new THREE.TextureLoader(lodingManager);
-const particle = textureLoader.load('./assets/alpha/9.png')
+const particle = textureLoader.load('/images/star-particle-alpha/9.png')
 
 //scene setup
 const scene = new THREE.Scene();

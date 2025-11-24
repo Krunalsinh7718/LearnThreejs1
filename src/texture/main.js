@@ -10,7 +10,7 @@ const gui = new GUI();
 //environment map
 
 const hdrLoader = new HDRLoader()
-hdrLoader.load('./assets/textures/environmentMap/2k.hdr', (environmentMap) =>
+hdrLoader.load('/images/environment-maps/5/2k.hdr', (environmentMap) =>
 {
     environmentMap.mapping = THREE.EquirectangularReflectionMapping;
 
@@ -37,17 +37,17 @@ lodingManager.onError = (url) => {
 
 const textureLoader = new THREE.TextureLoader(lodingManager)
 
-const doorColorTexture = textureLoader.load('./assets/textures/door/color.jpg');
+const doorColorTexture = textureLoader.load('/images/door/color.jpg');
 doorColorTexture.colorSpace = THREE.SRGBColorSpace
-const doorAlphaTexture = textureLoader.load('./assets/textures/door/alpha.jpg')
-const doorAmbientOcclusionTexture = textureLoader.load('./assets/textures/door/ambientOcclusion.jpg')
-const doorHeightTexture = textureLoader.load('./assets/textures/door/height.jpg')
-const doorNormalTexture = textureLoader.load('./assets/textures/door/normal.jpg')
-const doorMetalnessTexture = textureLoader.load('./assets/textures/door/metalness.jpg')
-const doorRoughnessTexture = textureLoader.load('./assets/textures/door/roughness.jpg')
-const matcapTexture = textureLoader.load('./assets/textures/matcaps/8.png');
+const doorAlphaTexture = textureLoader.load('/images/door/alpha.jpg')
+const doorAmbientOcclusionTexture = textureLoader.load('/images/door/ambientOcclusion.jpg')
+const doorHeightTexture = textureLoader.load('/images/door/height.jpg')
+const doorNormalTexture = textureLoader.load('/images/door/normal.jpg')
+const doorMetalnessTexture = textureLoader.load('/images/door/metalness.jpg')
+const doorRoughnessTexture = textureLoader.load('/images/door/roughness.jpg')
+const matcapTexture = textureLoader.load('/images/matcaps/8.png');
 matcapTexture.colorSpace = THREE.SRGBColorSpace
-const gradientTexture = textureLoader.load('./assets/textures/gradients/5.jpg')
+const gradientTexture = textureLoader.load('/images/shade-gradients/5.jpg')
 
 //basic material
 // const material = new THREE.MeshBasicMaterial();

@@ -69,19 +69,19 @@ const textureLoader = new THREE.TextureLoader(lodingManager);
 const cubeTextureLoader = new THREE.CubeTextureLoader(lodingManager)
 
 const environmentMapTexture = cubeTextureLoader.load([
-  './assets/textures/environmentMaps/0/px.png',
-  './assets/textures/environmentMaps/0/nx.png',
-  './assets/textures/environmentMaps/0/py.png',
-  './assets/textures/environmentMaps/0/ny.png',
-  './assets/textures/environmentMaps/0/pz.png',
-  './assets/textures/environmentMaps/0/nz.png'
+  '/images/environment-maps/0/px.png',
+  '/images/environment-maps/0/nx.png',
+  '/images/environment-maps/0/py.png',
+  '/images/environment-maps/0/ny.png',
+  '/images/environment-maps/0/pz.png',
+  '/images/environment-maps/0/nz.png'
 ])
 
 
 /*=============================================
 =            play sound            =
 =============================================*/
-const hitSound = new Audio("./assets/sounds/hit.mp3");
+const hitSound = new Audio("/sounds/hit.mp3");
 const playSound = (collision) => {
   const impactStrength = collision.contact.getImpactVelocityAlongNormal();
 

@@ -23,7 +23,7 @@ const gui = new GUI();
 =============================================*/
 const textureLoader = new THREE.TextureLoader();
 
-const texture1 = textureLoader.load("./assets/gradients/3.jpg");
+const texture1 = textureLoader.load("/images/shade-gradients/3.jpg");
 texture1.magFilter = THREE.NearestFilter;
 
 /*=============================================
