@@ -27,6 +27,16 @@ const parameters = {
     const position = { x: (Math.random() - 0.5) * 3, y: 6, z: (Math.random() - 0.5) * 3 };
     createBox(size, position)
   },
+  threwBall: function () {
+
+    const radius = Math.max(Math.min(Math.random(), 0.5), 0.1);
+    const throwPosition = {
+      x: camera.position.x,
+      y: camera.position.y,
+      z: camera.position.z
+    }
+    throwSphear(0.1, throwPosition)
+  },
   reset: function () {
     for (const object of objectsToUpdate) {
       // Remove body
@@ -46,6 +56,7 @@ const parameters = {
 const gui = new GUI();
 gui.add(parameters, "createSphereShape")
 gui.add(parameters, "createBoxShape")
+gui.add(parameters, "threwBall")
 gui.add(parameters, "reset")
 
 /*=============================================
@@ -100,8 +111,12 @@ const scene = new THREE.Scene();
 const world = new CANNON.World({
   gravity: { x: 0, y: -9.82, z: 0 },
 })
+world.solver.iterations = 20;
+world.solver.tolerance = 0.001;
+
 world.broadphase = new CANNON.SAPBroadphase(world);
 world.allowSleep = true;
+
 
 /*=============================================
 =            world material            =
@@ -111,8 +126,12 @@ const defaultContactMaterial = new CANNON.ContactMaterial(
   defaultMaterial,
   defaultMaterial,
   {
-    friction: 0.1,
-    restitution: 0.3
+    friction: 0.2,
+    restitution: 0.2,   // FIX: stable bounce
+    contactEquationStiffness: 1e7,
+    contactEquationRelaxation: 4,
+    frictionEquationStiffness: 1e7,
+    frictionEquationRelaxation: 4,
   }
 )
 world.defaultContactMaterial = defaultContactMaterial;
@@ -172,7 +191,7 @@ const createSphear = (radius, position) => {
     mass: 1,
     shape: shape,
     collisionFilterGroup: GROUP2, // Put the box in group 2
-    collisionFilterMask:  GROUP2 | GROUP1// It can only collide with group 1 (the sphere)
+    collisionFilterMask: GROUP2 | GROUP1// It can only collide with group 1 (the sphere)
   })
   body.addEventListener('collide', playSound)
   body.position.copy(position)
@@ -181,17 +200,59 @@ const createSphear = (radius, position) => {
   // const forceY = 0;
   // const forceZ = (Math.random() - 0.5) * 150 + 100;
 
-    const forceX = (Math.random() - 0.5) * 2  * 300 ;
+  const forceX = (Math.random() - 0.5) * 2 * 300;
   const forceY = 0;
-  const forceZ =  (Math.random() - 0.5) * 2  * 300 ;
+  const forceZ = (Math.random() - 0.5) * 2 * 300;
   console.log(forceZ);
-  
+
 
 
   body.applyForce(
     new CANNON.Vec3(forceX, forceY, forceZ),
     new CANNON.Vec3(0, 0, 0)
   )
+  world.addBody(body)
+
+  objectsToUpdate.push({
+    mesh: mesh,
+    body: body,
+    copyBodyPosToMesh() {
+      this.mesh.position.copy(this.body.position);
+    }
+  })
+}
+
+const throwSphear = (radius, position) => {
+  const mesh = new THREE.Mesh(sphereGeo, material);
+  mesh.scale.set(radius, radius, radius);
+  mesh.position.copy(position)
+  scene.add(mesh)
+
+  const shape = new CANNON.Sphere(radius);
+  const body = new CANNON.Body({
+    mass: 1,
+    shape: shape,
+    collisionFilterGroup: GROUP2, // Put the box in group 2
+    collisionFilterMask: GROUP2 | GROUP1// It can only collide with group 1 (the sphere)
+  })
+  body.linearDamping = 0.3;
+  body.angularDamping = 0.3;
+  body.sleepSpeedLimit = 0.1;
+  body.sleepTimeLimit = 1;
+  body.addEventListener('collide', playSound)
+  body.position.copy(position)
+
+  const direction = new THREE.Vector3();
+  camera.getWorldDirection(direction);
+
+  const impulse = new CANNON.Vec3(
+    direction.x * 8,
+    direction.y * 8,
+    direction.z * 8
+  );
+
+  body.applyImpulse(impulse, body.position);
+
   world.addBody(body)
 
   objectsToUpdate.push({
@@ -218,7 +279,7 @@ const createBox = (size, position) => {
     mass: 1,
     shape: shape,
     collisionFilterGroup: GROUP3, // Put the cylinder in group 3
-    collisionFilterMask:  GROUP3 | GROUP1
+    collisionFilterMask: GROUP3 | GROUP1
   })
   // console.log(body);
 
@@ -273,8 +334,8 @@ const floorShape = new CANNON.Plane();
 const floorBody = new CANNON.Body({
   mass: 0,
   shape: floorShape,
-  collisionFilterGroup: GROUP1, 
-  collisionFilterMask: GROUP1 | GROUP2 | GROUP3, 
+  collisionFilterGroup: GROUP1,
+  collisionFilterMask: GROUP1 | GROUP2 | GROUP3,
 })
 floorBody.quaternion.setFromAxisAngle(
   new CANNON.Vec3(-1, 0, 0),
@@ -319,16 +380,17 @@ function animation() {
   // Update controls
   controls.update()
 
+  
+  // console.log(camera.position);
+  
+  
+  //update world
+  world.step(1 / 60, deltaTime, 3);
+
   //update shape position
   for (const shape of objectsToUpdate) {
     shape.copyBodyPosToMesh()
   }
-
-  // console.log(camera.position);
-  
-
-  //update world
-  world.step(1 / 60, deltaTime, 3);
 
   // Render
   renderer.render(scene, camera)
