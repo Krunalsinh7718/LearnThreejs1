@@ -38,11 +38,11 @@ lodingManager.onError = (url) => {
 };
 
 const hdrLoader = new HDRLoader()
-hdrLoader.load('/images/environment-maps/5/2k.hdr', (environmentMap) =>
+hdrLoader.load('/images/environment-maps/6/blender-2k.hdr', (environmentMap) =>
 {
     environmentMap.mapping = THREE.EquirectangularReflectionMapping;
 
-    scene.background = environmentMap
+    // scene.background = environmentMap
     scene.environment = environmentMap
 })
 
@@ -75,8 +75,9 @@ const shape1 = new THREE.Mesh(
   new THREE.TorusKnotGeometry(0.4,0.15,100,16),
   new THREE.MeshStandardMaterial({ metalness: 1, roughness: 0.3, color: 0xaaaaaa })
 );
-shape1.position.x = - 4
+shape1.position.x = - 6
 shape1.position.y = 4
+shape1.scale.set(3,3,3)
 scene.add(shape1);
 
 
