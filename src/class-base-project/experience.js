@@ -5,6 +5,8 @@ import Sizes from "./sizes.js";
 import Time from "./time.js";
 import World from './world/World.js';
 import Environment from './world/Environment.js';
+import Resources from './utils/Resources.js';
+import sources  from './sources.js';
 
 let instance = null
 export default class Experience {
@@ -28,6 +30,7 @@ export default class Experience {
         this.renderer = new Renderer();
         this.world = new World();
         this.environment = new Environment();
+        this.resources = new Resources(sources);
         // console.log(this.canvas);
         
 
