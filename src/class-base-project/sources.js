@@ -10,5 +10,20 @@ export default [
             "/images/environment-maps/2/pz.png",
             "/images/environment-maps/2/nz.png",
         ]
+    },
+    {
+        name: 'grassColorTexture',
+        type: 'texture',
+        path: '/images/dirt/color.jpg'
+    },
+    {
+        name: 'grassNormalTexture',
+        type: 'texture',
+        path: '/images/dirt/normal.jpg'
+    },
+    {
+        name: 'foxModel',
+        type: 'gltfModel',
+        path: '/models/Fox/glTF/Fox.gltf'
     }
 ]
