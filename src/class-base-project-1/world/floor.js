@@ -11,17 +11,21 @@ export default class Floor{
         this.setMesh();
     }
     setGeometry(){
-        // this.geometry = new THREE.CircleGeometry(5, 64);
-        this.geometry = new THREE.BoxGeometry(1,1,1);
-
+        this.geometry = new THREE.CircleGeometry(5, 64);
+        
 
     }
     setMaterial(){
-        this.material = new THREE.MeshBasicMaterial();
-        this.material.color = "red";
+        this.material = new THREE.MeshStandardMaterial();
+        this.material.side = THREE.DoubleSide;
+        this.material.color = new THREE.Color("red");
     }
     setMesh(){
+        
         this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.rotation.x = - Math.PI * 0.5
+        
+        console.log(this.mesh);
         this.scene.add(this.mesh)
     }
 
