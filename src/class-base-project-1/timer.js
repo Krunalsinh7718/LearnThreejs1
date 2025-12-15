@@ -5,6 +5,7 @@ export default class Timer extends EventEmitter{
         super();
        this.current = Date.now();
        this.elapsed = 0;
+       this.delta = 16;
 
          requestAnimationFrame( () => {
             this.tick();

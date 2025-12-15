@@ -1,12 +1,13 @@
 import * as THREE from "three";
 import Camera from "./camera.js";
 import Sizes from "./sizes.js";
-import Environment from "./environment.js";
+
 import Renderer from "./renderer.js";
 import Timer from "./timer.js";
 import World from "./world/World.js";
 import sources from "./sources.js";
 import Resource from "./utils/resource.js";
+import Debug from "./utils/debug.js";
 
 
 let instance = null;
@@ -23,10 +24,11 @@ export default class Experience {
         this.sizes = new Sizes();
         this.scene = new THREE.Scene();
         this.camera = new Camera();
-        this.environment = new Environment();
+        
         this.resource = new Resource(sources);
         this.renderer = new Renderer();
         this.world = new World();
+        this.debug = new Debug();
 
         this.timer.on('tick', () => {
             this.update();
@@ -40,6 +42,7 @@ export default class Experience {
     update(){
         this.camera.update();
         this.renderer.update();
+        this.world.update();
     }
     resize(){
         this.camera.resize();
