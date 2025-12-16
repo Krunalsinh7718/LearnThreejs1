@@ -8,6 +8,10 @@ export default class Fox {
         this.resources = this.experience.resource;
         this.time = this.experience.timer;
 
+        this.floor = this.experience.world.floor;
+        // console.log("fox floor",this.floor);
+        
+
         this.debug = this.experience.debug;
 
         if(this.debug.active){
@@ -16,6 +20,8 @@ export default class Fox {
 
         //setup
         this.resource = this.resources.items.foxModel;
+
+        
 
         this.setModal();
 
@@ -49,8 +55,9 @@ export default class Fox {
 
         
         this.animation.play = (name) => {
-            const newAction = this.animation.action[name];
-            const oldAction = this.animation.action.current;
+            
+            const newAction = this.animation.actions[name];
+            const oldAction = this.animation.actions.current;
             
             newAction.reset();
             newAction.play();
@@ -63,12 +70,17 @@ export default class Fox {
         if(this.debug.active){
             const debug = {
                 playIdle : () => {
+                    this.floor.activeRotate = false;
                     this.animation.play('idle')
                 },
                 playWalk : () => {
+                    this.floor.activeRotate = true;
+                    this.floor.activeRotateSpeed = 0.0003;
                     this.animation.play('walk')
                 },
                 playRun : () => {
+                    this.floor.activeRotate = true;
+                    this.floor.activeRotateSpeed = 0.0008;
                     this.animation.play('run')
                 },
             }

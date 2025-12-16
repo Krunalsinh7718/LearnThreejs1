@@ -6,6 +6,10 @@ export default class Floor{
         this.experience = new Experience();
         this.scene = this.experience.scene;
         this.resources = this.experience.resource;
+        this.timer = this.experience.timer;
+
+        this.activeRotate = false;
+        this.activeRotateSpeed = 0.0001;
 
         this.setGeometry();
         this.setTexture();
@@ -13,7 +17,7 @@ export default class Floor{
         this.setMesh();
     }
     setGeometry(){
-        this.geometry = new THREE.CircleGeometry(5, 64);
+        this.geometry = new THREE.SphereGeometry(10,64,64);
     }
     setTexture(){
         this.texture = {};
@@ -39,10 +43,15 @@ export default class Floor{
     setMesh(){
         
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-        this.mesh.rotation.x = - Math.PI * 0.5
+        this.mesh.position.y = -10;
         this.mesh.receiveShadow = true;
         // console.log(this.mesh);
         this.scene.add(this.mesh)
+    }
+    update(){
+        if(this.activeRotate){
+            this.mesh.rotation.x -= this.timer.delta * this.activeRotateSpeed;
+        }
     }
 
     

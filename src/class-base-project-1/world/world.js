@@ -1,7 +1,7 @@
 import * as THREE from "three"; 
 import Experience from "../experience";
 import Floor from "./floor.js";
-import Fox from "./Fox.js";
+import Fox from "./fox.js";
 import Environment from "./environment.js";
 
 
@@ -23,6 +23,9 @@ export default class World {
     update(){
         if(this.fox){
             this.fox.update();
+        }
+        if(this.floor){
+            this.floor.update();
         }
     }
    
