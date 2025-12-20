@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import GUI from 'lil-gui'
-import testVertexShader from './shaders/test/vertex.glsl'
-import testFragmentShader from './shaders/test/fragment.glsl'
+import testVertexShader from './shaders/test/vertex.vert'
+import testFragmentShader from './shaders/test/fragment.frag'
 
 // console.log(testVertexShader);
 
@@ -31,16 +31,24 @@ document.body.appendChild(renderer.domElement);
 
 //mesh setup
 // Geometry
-const geometry = new THREE.PlaneGeometry(1, 1, 32, 32)
+const geometry = new THREE.PlaneGeometry(1, 1, 32, 32);
+const count = geometry.attributes.position.count;
+const randoms = new Float32Array(count);
+for (let i = 0; i < count; i++) {
+    randoms[i] = Math.random();
+    
+}
+console.log(geometry);
+geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
+
+
+
 
 // Material
 const material = new THREE.RawShaderMaterial({
-    vertexShader : `
-      
-    `,
-    fragmentShader: `
-    
-    `
+    vertexShader : testVertexShader,
+    fragmentShader: testFragmentShader,
+    transparent: true
 })
 
 // Mesh
