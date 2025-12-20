@@ -6,10 +6,9 @@ import testFragmentShader from './shaders/test/fragment.frag'
 
 // console.log(testVertexShader);
 
+const gui = new GUI();
 
-/**
- * Sizes
- */
+//sizes
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
@@ -17,6 +16,12 @@ const sizes = {
 
 //scene setup
 const scene = new THREE.Scene();
+
+//texture
+
+const textureLoader = new THREE.TextureLoader();
+const flagTexture = textureLoader.load("/images/flag/India-flag.jpg");
+
 
 //camera setup
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
@@ -33,38 +38,60 @@ document.body.appendChild(renderer.domElement);
 // Geometry
 const geometry = new THREE.PlaneGeometry(1, 1, 32, 32);
 const count = geometry.attributes.position.count;
-const randoms = new Float32Array(count);
+const aRandom = new Float32Array(count);
+
 for (let i = 0; i < count; i++) {
-    randoms[i] = Math.random();
-    
+    aRandom[i] = Math.random();
 }
-console.log(geometry);
-geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
+geometry.setAttribute('aRandom', new THREE.BufferAttribute(aRandom, 1));
 
 
+
+console.log(count);
 
 
 // Material
 const material = new THREE.RawShaderMaterial({
-    vertexShader : testVertexShader,
+    vertexShader: testVertexShader,
     fragmentShader: testFragmentShader,
-    transparent: true
-})
+    uniforms: {
+        uTime : {
+            value : 0
+        },
+        uFrequency: { 
+            value: new THREE.Vector2(10,10) 
+        },
+        uTexture: {
+            value: flagTexture
+        }
+    }
+});
 
+gui.add(material.uniforms.uFrequency.value, "x").min(0).max(20).step(0.01).name("vFrequency X");
+gui.add(material.uniforms.uFrequency.value, "y").min(0).max(20).step(0.01).name("vFrequency Y");
 // Mesh
 const mesh = new THREE.Mesh(geometry, material)
-scene.add(mesh)
+scene.add(mesh);
+mesh.scale.y = 2 / 3
 
 //controls setup
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 
+const clock = new THREE.Clock();
 //animation loop
 function animate() {
 
+    const elapsedTime = clock.getElapsedTime();
+
+    //update materials
+    material.uniforms.uTime.value = elapsedTime;
+
+    //update controls
     controls.update();
 
+    //render
     renderer.render(scene, camera);
 }
 
