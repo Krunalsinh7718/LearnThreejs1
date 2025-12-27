@@ -38,12 +38,20 @@ const geometry = new THREE.PlaneGeometry(1, 1, 32, 32);
 const material = new THREE.ShaderMaterial({
     vertexShader: testVertexShader,
     fragmentShader: testFragmentShader,
+    uniforms: {
+        uTime: {
+            value : 0
+        }
+    }
    
 });
 
 // Mesh
 const mesh = new THREE.Mesh(geometry, material)
 scene.add(mesh);
+
+console.log(material);
+
 
 //controls setup
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -55,6 +63,9 @@ const clock = new THREE.Clock();
 function animate() {
 
     const elapsedTime = clock.getElapsedTime();
+
+    //update materials
+    material.uniforms.uTime.value = elapsedTime;
 
 
     //update controls

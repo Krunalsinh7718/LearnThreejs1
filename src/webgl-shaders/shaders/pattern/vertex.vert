@@ -1,6 +1,7 @@
 
 
 varying vec2 vUv;
+varying float umouse;
 
 void main(){
 
