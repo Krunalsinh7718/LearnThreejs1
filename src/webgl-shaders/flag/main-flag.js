@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import GUI from 'lil-gui'
-import testVertexShader from './shaders/flag/vertex.vert'
-import testFragmentShader from './shaders/flag/fragment.frag'
+import testVertexShader from './vertex.vert'
+import testFragmentShader from './fragment.frag'
 
 // console.log(testVertexShader);
 
