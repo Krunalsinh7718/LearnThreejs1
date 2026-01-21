@@ -17,74 +17,50 @@ const scene = new THREE.Scene();
 
 //generate galaxy
 const parameters = {};
-parameters.count = 1000;
-parameters.size = 0.02;
-parameters.radius = 5;
+parameters.count = 100000;
+parameters.radius = 3;
 parameters.branches = 3;
-parameters.spin = 3;
-parameters.randomness = 0.2;
 
-let geomatry = null;
+let geometry = null;
 let material = null;
-let points = null;
+
 
 const generateGalaxy = () => {
+    //geometry
+    geometry = new THREE.BufferGeometry();
 
-    //distroy old galaxy
-    if(points !== null){
-        geomatry.dispose();
-        material.dispose();
-        scene.remove(points);
-    }
+    let positions = new Float32Array(parameters.count * 3);
 
-    //geomatry
-    geomatry = new THREE.BufferGeometry();
-    const positions = new Float32Array(parameters.count * 3);
-    
     for (let index = 0; index < parameters.count; index++) {
         const i3 = index * 3;
 
-        const radius = Math.random() * parameters.radius;
-        const spinAngle = radius * parameters.spin;
-        const branchAngle = (index % parameters.branches) / parameters.branches * Math.PI * 2;
-
-        const randomX = Math.random() * parameters.randomness;
-        const randomY = Math.random() * parameters.randomness;
-        const randomZ = Math.random() * parameters.randomness;
-
-        if(index < 20){
-            console.log(index, branchAngle);
+        let splitAngle = (index % parameters.branches) / parameters.branches * Math.PI * 2;
+        // if(index < 20){
+        //     console.log(index, splitAngle);
             
-        }
+        // }
+        const randRadius = parameters.radius * Math.random();
+        const randomness = Math.random() - 0.5;
 
-        positions[i3 + 0] = Math.cos(branchAngle + spinAngle) * radius + randomX;    
-        positions[i3 + 1] = randomY;    
-        positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;    
-    }  
+        positions[i3] = randRadius * Math.cos(splitAngle + randomness);
+        positions[i3 + 1] = randomness;
+        positions[i3 + 2] = randRadius * Math.sin(splitAngle + randomness) ;
+        
+    }
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
-    geomatry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-
-    //material
-    material = new THREE.PointsMaterial({
-        size : parameters.size,
-        sizeAttenuation : true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending
+    const material = new THREE.PointsMaterial({
+        size: 0.01,
+        color: "red"
     })
 
-    //points
-    points = new THREE.Points(geomatry, material);
+    const points = new THREE.Points(geometry, material);
     scene.add(points);
-} 
-
-gui.add(parameters, "count").min(100).max(100000).step(100).onFinishChange(generateGalaxy);
-gui.add(parameters, "size").min(0.001).max(0.1).step(0.001).onFinishChange(generateGalaxy);
-gui.add(parameters, "radius").min(0.01).max(20).step(0.01).onFinishChange(generateGalaxy);
-gui.add(parameters, "branches").min(1).max(20).step(1).onFinishChange(generateGalaxy);
-gui.add(parameters, "spin").min(-5).max(5).step(0.001).onFinishChange(generateGalaxy);
-gui.add(parameters, "randomness").min(0).max(2).step(0.001).onFinishChange(generateGalaxy);
+    
 
 
+    
+}
 generateGalaxy();
 
 //camera setup
