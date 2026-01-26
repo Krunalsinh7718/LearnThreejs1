@@ -67,6 +67,80 @@ const material = new THREE.MeshStandardMaterial( {
     normalMap: normalTexture
 })
 
+const depthMaterial = new THREE.MeshDepthMaterial({
+    depthPacking: THREE.RGBADepthPacking
+})
+
+const customUniforms = {
+    uTime : {value: 0}
+}
+
+const updateShader = (shader, isNormalMaterial = false) => {
+    shader.uniforms.uTime = customUniforms.uTime;
+    shader.vertexShader = shader.vertexShader.replace(
+        '#include <common>',
+        `
+            #include <common>
+
+            uniform float uTime;
+
+            mat2 get2dRotateMatrix(float _angle)
+            {
+                return mat2(cos(_angle), - sin(_angle), sin(_angle), cos(_angle));
+            }
+
+            mat2 scale(vec2 _scale){
+                return mat2(_scale.x,0.0,
+                            0.0,_scale.y);
+            }
+                
+        `
+    )
+
+
+    const rotationMatrix = `
+    float angle = (
+    cos(position.y - uTime) 
+    ) * 0.1 + 0.2;
+    // mat2 rotateMatrix = get2dRotateMatrix(angle);
+    mat2 rotateMatrix = scale(vec2(abs(angle * 5.0)));
+    `
+    if(isNormalMaterial){
+
+        shader.vertexShader = shader.vertexShader.replace(
+             '#include <beginnormal_vertex>',
+              `
+              #include <beginnormal_vertex>
+    
+                ${rotationMatrix}
+    
+                objectNormal.xz = rotateMatrix * objectNormal.xz;
+              `
+        )
+    }
+    shader.vertexShader = shader.vertexShader.replace(
+        '#include <begin_vertex>',
+        `
+            #include <begin_vertex>
+
+            ${!isNormalMaterial ? rotationMatrix : ''}
+
+            transformed.xz = rotateMatrix * transformed.xz;
+        `
+    )
+}
+
+material.onBeforeCompile = (shader) =>
+{
+    updateShader(shader, true);
+}
+
+
+depthMaterial.onBeforeCompile = (shader) =>
+{
+    updateShader(shader, false);
+}
+
 /**
  * Models
  */
@@ -77,13 +151,26 @@ gltfLoader.load(
         // Model
         const mesh = gltf.scene.children[0]
         mesh.rotation.y = Math.PI * 0.5
-        mesh.material = material
+        mesh.material = material;
+        mesh.customDepthMaterial = depthMaterial; // Update the depth material
         scene.add(mesh)
 
         // Update materials
         updateAllMaterials()
     }
 )
+
+/**
+ * Plane
+ */
+const plane = new THREE.Mesh(
+    new THREE.PlaneGeometry(15, 15, 15),
+    new THREE.MeshStandardMaterial()
+)
+plane.rotation.y = Math.PI
+plane.position.y = - 5
+plane.position.z = 5
+scene.add(plane)
 
 /**
  * Lights
@@ -104,8 +191,12 @@ scene.add(camera)
 
 //renderer setup
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize(sizes.width, sizes.height)
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1;
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setAnimationLoop(animate);
 document.body.appendChild(renderer.domElement);
 
@@ -122,11 +213,15 @@ function animate() {
 
     const elapsedTime = clock.getElapsedTime();
 
+    customUniforms.uTime.value = elapsedTime;
+
     //update controls
     controls.update();
 
     //render
     renderer.render(scene, camera);
+
+    
 }
 
 //handle window resize
