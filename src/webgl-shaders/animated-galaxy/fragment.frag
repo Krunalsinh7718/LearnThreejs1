@@ -1,14 +1,15 @@
-precision mediump float;
 
-varying float vElevation;
-
-uniform sampler2D uTexture;
-varying vec2 vUv;
-
+varying vec3 vColor;
 
 void main(){
-    vec4 flagColor = texture2D(uTexture, vUv);
-    flagColor.rgb *= vElevation * 1.0 + 0.8;
-    // gl_FragColor = vec4(sampler2D, 1.0);
-    gl_FragColor = flagColor;
+
+    //light point
+    float strength = distance(gl_PointCoord, vec2(0.5));
+    strength = 1.0 - strength;
+    strength = pow( strength, 10.0);
+    
+    //final result
+    vec3 color = mix(vec3(0.0), vColor, strength);
+    gl_FragColor = vec4(color, 1.0);
+    #include <colorspace_fragment>
 }

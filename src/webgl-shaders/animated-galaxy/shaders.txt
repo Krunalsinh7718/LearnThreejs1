@@ -1,0 +1,266 @@
+
+ref => 
+https://www.youtube.com/watch?v=xZM8UJqN1eY&t=655s
+https://www.youtube.com/watch?v=f4s1h2YETNY
+https://shadertoy.com/
+
+##################### basic type data
+1) int
+2) float
+3) bool
+
+
+##################### conversion function
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+impleset type conversion is not possible 
+we can use conversion function to convert
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1) int c = int(true);
+2) float d = float(2);
+3) float e = float(false);
+
+
+##################### vectors
+*****  vec
+1) vec2
+2) vec3
+3) vec4
+
+*****  ivec
+1) ivec2
+2) ivec3
+3) ivec4
+
+*****  bvec
+1) bvec2
+2) bvec3
+3) bvec4
+
+==> Declare vector
+ex. 
+vec2 vectA = vec2(1.0,6.0);
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+three type of cheractor use to get and set data
+1)```````````````x,   y,   z,   w
+2)```````````````r,   g,   b,   a
+3)```````````````s,   t,   p,   q
+vec4 vect = bec4(0.1, 0.2, 0.3, 0.4);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+==> get and set data from vector
+vec3 vectA = vec3(1.0, 2.0, 3.0);
+
+vec2 vectB = vectA.xz; // output: vec2 vectB = vec2(1.0, 3.0);
+
+vec3 vectC = vectA.rrr; // output: vec3 vectC = vec3(1.0, 1.0, 1.0)
+
+
+
+##################### Matrices
+
+1) mat2: [x1, x2,
+          y1, y2]
+
+2) mat3: [x1, x2, x3,
+          y1, y2, y3,
+          z1, z2, z3]
+
+3) mat4: [x1, x2, x3, x4,
+          y1, y2, y3, y4,
+          z1, z2, z3, z4,
+          w1, w2, w3, w4]
+
+*****  Declare matrix
+
+mat2 matrA = mat2(1, 1, false, flase); // output : mat2 matrA = mat2(1.0 , 1.0, 0.0, 0.0)
+
+*****  Set and get value
+ex. 
+[7.0, 0.0, 1.0,
+ 4.0, 2.0, 3.0,
+ 5.0, 5.0, 7.0]
+ _0_,_1__,_2__
+
+ mat3 matrA = mat3(7.0, 4.0, 5.0, 0.0, 2.0, 5.0, 1.0, 3.0, 7.0);
+```````````````````______0______,______1_______,______2_______
+
+vec3 vectC1 = matrA[0] //output: vec3 vectC1 = vec3(7.0, 4.0, 5.0)
+
+-> set value matrA[0][1] (4.0) by 100.0
+ option 1) matrA[0][1] = 100.0;
+ option b) matrA[0]y = 100.0;
+
+-> get value matrA[0][1] (4.0)
+ option 1) float f = matrA[0][1];
+ option b) matrA[0]y = matrA[0]y;
+
+
+##################### samplers
+~~~~~~~~~~~~~~~~~~~~~~~~~
+Use to store image data
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ 1) sampler2D
+ 2) samplerCube
+
+
+##################### Arrays
+
+*****  declare Array
+float arrayA[7]
+
+*****  set the value of the 1st element
+arrayA[0] = 20.0;
+
+*****  get the value of 1st element
+float a = arrayA[0];
+
+
+##################### Structures
+
+*****  declare Structure
+
+struct myType{
+    int c1;
+    vect3 c2;
+}
+
+myType a;
+
+*****  set value of c1
+
+a.c1 = 10;
+
+*****  get value of c2
+
+vec3 vect = a.c2;
+
+##################### Control flow statements
+
+if(condition){
+    //Do something
+}else if(condition 2){
+    //Do something
+}else{
+    //Do something
+}
+
+
+for(int i = 0; i < 10; i++){
+    //Do something
+}
+
+##################### functions
+
+float funcA(int a, vec2 b){
+    //Do something
+    return 1.0;
+}
+
+void funcB(vec3 vect){
+    //Do something
+    //No return
+}
+
+~~~~~~~~~~~~~~Corret way ~~~~~~~~~~~~~~~
+vec2 funcC(){
+    return vec2(1.0, 2.0);
+}
+
+vec2 vect = funcC();
+~~~~~~~~~~~~~~Corret way ~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~wrong way ~~~~~~~~~~~~~~~
+vec2 vect = funcC();
+
+vec2 funcC(){
+    return vec2(1.0, 2.0);
+}
+~~~~~~~~~~~~~~wrong way ~~~~~~~~~~~~~~~
+
+***** prototypes
+
+vec2 funcE(float x, float y);
+
+vec2 vect = funcE(1.0, 1.0);
+
+vec2 funcE(float x, float y){
+    return vec2(1.0, 2.0);
+}
+
+##################### storage qualifiers
+
+1) const : const type varible_identifier = value;
+2) attribute : attribute type varible_identifier;
+    => every vertex may have different attribute value
+    => only use in vertex shader
+3) uniform : uniform type varible_identifier;
+    => every vertex must have same uniform value
+    => we can use in vertex and fragment shader both.
+    => use to pass data from javascript to shaders
+4) varying : varying type varible_identifier;
+    => use to pass data vertex shader to fragment shader
+
+##################### precision qualifiers
+1) lowp
+2) mediump
+3) highp
+
+***** Declare precision qualifiers
+precision_qualifier type varible_identifier;
+==> ex: mediump float f;
+
+precision precision_qualifier type;
+==> ex: precision highp vec2;
+
+##################### shaders
+
+==> Example vector
+.---.---.---.
+|_*_|_*_|_*_|
+|_*_|_*_|_*_|
+
+-> hear we have splane with 18 joints mease 18 vectors.
+-> consider v1(0.0, 0.8, 0.0, 1.0)
+-> consider v18(1.0, 0.2, 0.0, 1.0)
+
+1) vertex shader
+
+==> create function for vertex shader
+
+void main(){
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+
+
+==> the vertex function call for every vertex. if we have 18 vertex it will call 18 times.
+==> "gl_Position" is builtin varible which have final position of current vertex which decides where to draw.
+==> At the first execution the "position" varible has vec4(0.0, 0.8, 0.0, 1.0). 
+==> At the 18th execution the "position" varible has vec4(1.0, 0.2, 0.0, 1.0). 
+==> "projectionMatrix" and "modelViewMatrix" are built in uniforms to calculate the final position vertex.
+
+2) fragmaent shader
+
+==> create function for fragment shader.
+
+void main(){
+    gl_FragColor = vec4( 0.1, 0.5, 0.5, 1.0);
+//-----------------------R__, G__, B__, A__
+}
+
+==> the fragment function call for every vertex. if we have 18 vertex it will call 18 times.
+==> fragmaent shader is responsible for colorization process of every vector.
+==> "gl_FragColor" builtin varible contains color of onr fragment.
+==> vec4( 0.1, 0.5, 0.5, 1.0) contains color for Red, Green, Blue and Alpha channel.
+
+
+
+
+
+
+
+
+
+
+

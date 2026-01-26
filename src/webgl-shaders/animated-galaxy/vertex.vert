@@ -1,31 +1,41 @@
-uniform mat4 modelMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
-
+uniform float uSize;
 uniform float uTime;
-uniform vec2 uFrequency;
 
-attribute vec3 position;
-attribute float aRandom;
-attribute vec2 uv;
+attribute float aScale;
+attribute vec3 aRandomness;
 
-varying float vElevation;
-varying vec2 vUv;
+varying vec3 vColor;
 
 void main(){
+    /*
+    * Position
+    */
+    vec4 modelPosition = modelMatrix * vec4(position, 1.0);
 
-    vec4 pos = modelMatrix * vec4(position, 1.0);  
+    //spin
+    float angle = atan(modelPosition.x, modelPosition.z);
+    float distanceToCenter = length(modelPosition.xz);
+    float angleOffset = (1.0 / distanceToCenter) * uTime * 0.2;
+    angle += angleOffset;
+    modelPosition.x = cos(angle) * distanceToCenter ;
+    modelPosition.z = sin(angle ) * distanceToCenter;
 
-    float elevation = sin(pos.x * uFrequency.x - uTime ) * 0.1; 
-    elevation += sin(pos.y * uFrequency.y - uTime) * 0.1; 
-    pos.z += elevation;
-    // pos.z += aRandom * 0.1; 
-    gl_Position = projectionMatrix * viewMatrix * pos;
+    //randomness
+    modelPosition.xyz += aRandomness;
 
-    vElevation = elevation ;
+    vec4 viewPosition = viewMatrix * modelPosition; 
+    vec4 projectedPosition = projectionMatrix * viewPosition; 
+    
+    gl_Position = projectedPosition;
 
-    vUv = uv; 
+    /*
+    * Size
+    */
+    gl_PointSize = uSize * aScale;
+    gl_PointSize *= ( 1.0 / - viewPosition.z );
 
+    /*
+    * color
+    */
+    vColor = color;
 }
-
-
