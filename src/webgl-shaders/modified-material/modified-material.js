@@ -24,12 +24,9 @@ const cubeTextureLoader = new THREE.CubeTextureLoader()
 /**
  * Update all materials
  */
-const updateAllMaterials = () =>
-{
-    scene.traverse((child) =>
-    {
-        if(child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial)
-        {
+const updateAllMaterials = () => {
+    scene.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
             child.material.envMapIntensity = 1
             child.material.needsUpdate = true
             child.castShadow = true
@@ -62,20 +59,22 @@ mapTexture.colorSpace = THREE.SRGBColorSpace
 const normalTexture = textureLoader.load('/models/LeePerrySmith/normal.jpg')
 
 // Material
-const material = new THREE.MeshStandardMaterial( {
+const material = new THREE.MeshStandardMaterial({
     map: mapTexture,
     normalMap: normalTexture
 })
+
+const material1 = new THREE.MeshStandardMaterial();
 
 const depthMaterial = new THREE.MeshDepthMaterial({
     depthPacking: THREE.RGBADepthPacking
 })
 
 const customUniforms = {
-    uTime : {value: 0}
+    uTime: { value: 0 }
 }
 
-const updateShader = (shader, isNormalMaterial = false) => {
+const updateShader = (shader, isNormalMaterial = false, rotate = false) => {
     shader.uniforms.uTime = customUniforms.uTime;
     shader.vertexShader = shader.vertexShader.replace(
         '#include <common>',
@@ -98,18 +97,25 @@ const updateShader = (shader, isNormalMaterial = false) => {
     )
 
 
-    const rotationMatrix = `
+    let rotationMatrix = `
     float angle = (
     cos(position.y - uTime) 
     ) * 0.1 + 0.2;
-    // mat2 rotateMatrix = get2dRotateMatrix(angle);
     mat2 rotateMatrix = scale(vec2(abs(angle * 5.0)));
     `
-    if(isNormalMaterial){
+    if(rotate){
+        rotationMatrix = `
+    float angle = (
+    cos(position.y - uTime) 
+    ) * 2.9;
+    mat2 rotateMatrix = get2dRotateMatrix(angle);
+    `
+    }
+    if (isNormalMaterial) {
 
         shader.vertexShader = shader.vertexShader.replace(
-             '#include <beginnormal_vertex>',
-              `
+            '#include <beginnormal_vertex>',
+            `
               #include <beginnormal_vertex>
     
                 ${rotationMatrix}
@@ -130,14 +136,12 @@ const updateShader = (shader, isNormalMaterial = false) => {
     )
 }
 
-material.onBeforeCompile = (shader) =>
-{
+material.onBeforeCompile = (shader) => {
     updateShader(shader, true);
 }
 
 
-depthMaterial.onBeforeCompile = (shader) =>
-{
+depthMaterial.onBeforeCompile = (shader) => {
     updateShader(shader, false);
 }
 
@@ -146,8 +150,7 @@ depthMaterial.onBeforeCompile = (shader) =>
  */
 gltfLoader.load(
     '/models/LeePerrySmith/LeePerrySmith.glb',
-    (gltf) =>
-    {
+    (gltf) => {
         // Model
         const mesh = gltf.scene.children[0]
         mesh.rotation.y = Math.PI * 0.5
@@ -157,6 +160,26 @@ gltfLoader.load(
 
         // Update materials
         updateAllMaterials()
+    }
+)
+
+
+gltfLoader.load(
+    '/models/FlightHelmet/glTF/FlightHelmet.gltf',
+    (gltf) => {
+        console.log(gltf.scene);
+
+        gltf.scene.position.set(0, -2, -10);
+        gltf.scene.scale.set(10, 10, 10);
+        gltf.scene.rotation.set(0, 2, 0);
+        gltf.scene.children.forEach(
+            children => {
+                children.material.onBeforeCompile = (shader) => {
+                    updateShader(shader, true, true);
+                }
+            }
+        )
+        scene.add(gltf.scene)
     }
 )
 
@@ -221,7 +244,7 @@ function animate() {
     //render
     renderer.render(scene, camera);
 
-    
+
 }
 
 //handle window resize
