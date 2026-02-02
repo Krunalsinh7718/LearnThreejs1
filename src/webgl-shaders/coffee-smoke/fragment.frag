@@ -6,16 +6,21 @@ varying vec2 vUv;
 void main(){
 
     vec2 smokeUv = vUv;
+    smokeUv.x *= 0.5;
+    smokeUv.y *= 0.3;
     smokeUv.y -= uTime * 0.05;
 
-    float noise = texture2D(uPerlinNoise, smokeUv).r;
+    float noise = texture(uPerlinNoise, smokeUv).r;
 
-    float fadeLeft = smoothstep(1.0, 0.8, vUv.x);
-    float fadeRight = smoothstep(0.1, 0.3, vUv.x);
-    float fadeUp = smoothstep(1.0, 0.8, vUv.y);
-    float fadeDown = smoothstep(0.1, 0.3, vUv.y);
-    float finalFade = fadeLeft * fadeRight * fadeUp * fadeDown * noise;
+    float smoke = smoothstep(0.4, 1.0, noise);
 
+    smoke *= smoothstep(0.0, 0.1, vUv.x);
+    smoke *= smoothstep(1.0, 0.9, vUv.x);
+    smoke *= smoothstep(0.0, 0.1, vUv.y);
+    smoke *= smoothstep(1.0, 0.4, vUv.y);
 
-    gl_FragColor = vec4(1.0,1.0,1.0, finalFade);
+    gl_FragColor = vec4(0.6, 0.3, 0.2, smoke);
+    // gl_FragColor = vec4(1.0,1.0,1.0, 1.0);
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
 }

@@ -49,6 +49,7 @@ const material = new THREE.ShaderMaterial({
         vertexShader: smokeVertexShader,
         fragmentShader: smokeFragmentShader,
         transparent: true,
+        depthWrite: false,
         uniforms: {
             uPerlinNoise : new THREE.Uniform(perlinNoise),
             uTime : new THREE.Uniform(0)
