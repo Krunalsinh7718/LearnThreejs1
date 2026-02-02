@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import testVertexShader from './vertex.vert'
-import testFragmentShader from './fragment.frag'
-import GUI from 'lil-gui'
+import GUI from 'lil-gui';
+import smokeVertexShader from "./vertex.vert";
+import smokeFragmentShader from "./fragment.frag";
 
 const gui = new GUI({ width: 350 });
 
@@ -21,69 +21,60 @@ const scene = new THREE.Scene();
  */
 const textureLoader = new THREE.TextureLoader()
 const gltfLoader = new GLTFLoader()
+const cubeTextureLoader = new THREE.CubeTextureLoader()
 
+// Textures
+const perlinNoise = textureLoader.load('/images/perlin-noise/perlin.png');
+perlinNoise.wrapS = THREE.RepeatWrapping;
+perlinNoise.wrapT = THREE.RepeatWrapping;
 /**
  * Models
  */
-
 gltfLoader.load(
-    '/models/coffiee-with-table/bakedModel.glb',
+    '/models/coffee-with-table/bakedModel.glb',
     (gltf) => {
-        gltf.scene.getObjectByName('baked').material.map.anisotropy = 8;
         scene.add(gltf.scene)
     }
 )
 
 /**
- * Smaoke
+ * Plane
  */
-//geomatry
-const smokeGeomatry = new THREE.PlaneGeometry(1, 1, 16, 64);
-smokeGeomatry.translate(0, 0.5, 0);
-smokeGeomatry.scale(1.5, 6, 1.5);
+const geomatry = new THREE.PlaneGeometry(1, 1, 16, 64);
+geomatry.translate(0, 0.5, 0);
+geomatry.scale(1.5, 6,1);
 
-//perline texture
-const perlinTexture = textureLoader.load('/images/coffiee-smoke/perlin.png');
-perlinTexture.wrapS = THREE.RepeatWrapping;
-perlinTexture.wrapT = THREE.RepeatWrapping;
-//material
-const smokeMaterial = new THREE.ShaderMaterial({
-    // color: "cyan",
-    // wireframe: true,
-    transparent: true,
-    vertexShader: testVertexShader,
-    fragmentShader: testFragmentShader,
-    side: THREE.DoubleSide,
-    depthWrite: false,
-    uniforms: {
-        uperlinTexture: new THREE.Uniform(perlinTexture),
-        uTime: new THREE.Uniform(0)
-    }
-})
+const material = new THREE.ShaderMaterial({
+        side: THREE.DoubleSide,
+        vertexShader: smokeVertexShader,
+        fragmentShader: smokeFragmentShader,
+        transparent: true,
+        uniforms: {
+            uPerlinNoise : new THREE.Uniform(perlinNoise),
+            uTime : new THREE.Uniform(0)
+        }
+    })
 
-//mesh
-const smoke = new THREE.Mesh(smokeGeomatry, smokeMaterial);
-smoke.position.y = 1.83;
-scene.add(smoke);
-
-
+const plane = new THREE.Mesh(
+    geomatry,
+    material
+)
+// plane.rotation.y = Math.PI
+plane.position.y = 1.825
+// plane.position.z = 5
+scene.add(plane)
 
 //camera setup
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.x = 8
-camera.position.y = 10
-camera.position.z = 12
+camera.position.set(4, 1, - 4)
 scene.add(camera)
 
 //renderer setup
-const renderer = new THREE.WebGLRenderer({ antialias: true});
-
+const renderer = new THREE.WebGLRenderer();
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setAnimationLoop(animate);
 document.body.appendChild(renderer.domElement);
-
-
 
 //controls setup
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -96,14 +87,13 @@ function animate() {
 
     const elapsedTime = clock.getElapsedTime();
 
-    smokeMaterial.uniforms.uTime.value = elapsedTime;
+    material.uniforms.uTime.value = elapsedTime;
 
     //update controls
     controls.update();
 
     //render
     renderer.render(scene, camera);
-
 
 }
 
