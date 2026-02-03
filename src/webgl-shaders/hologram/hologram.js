@@ -28,9 +28,25 @@ const cubeTextureLoader = new THREE.CubeTextureLoader()
 /**
  * Material
  */
+const materialParameters = {};
+materialParameters.color = '#70c1ff';
+
+gui.addColor(materialParameters, 'color').name("material color").onChange( e => {
+    material.uniforms.uColor.value.set(materialParameters.color);
+})
+
+
 const material = new THREE.ShaderMaterial({
     vertexShader: vertexShader,
-    fragmentShader: fragmentShader
+    fragmentShader: fragmentShader,
+    transparent: true,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    uniforms: {
+        uTime: new THREE.Uniform(0),
+        uColor: new THREE.Uniform(new THREE.Color('red'))
+    }
 });
 
 /**
@@ -47,11 +63,11 @@ gltfLoader.load(
             LeePerrySmith.material = material
         }
         LeePerrySmith.scale.set(0.4, 0.4, 0.4);
-        LeePerrySmith.rotation.y = Math.PI * 0.5
+        LeePerrySmith.rotation.y = Math.PI * 0.5;
         scene.add(LeePerrySmith)
-
     }
 )
+
 // Torus knot
 const torusKnot = new THREE.Mesh(
     new THREE.TorusKnotGeometry(0.6, 0.25, 128, 32),
@@ -101,6 +117,8 @@ const clock = new THREE.Clock();
 function animate() {
 
     const elapsedTime = clock.getElapsedTime();
+
+    material.uniforms.uTime.value = elapsedTime;
 
     // Rotate objects
     if(LeePerrySmith)
