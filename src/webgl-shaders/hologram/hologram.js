@@ -40,12 +40,12 @@ const material = new THREE.ShaderMaterial({
     vertexShader: vertexShader,
     fragmentShader: fragmentShader,
     transparent: true,
-    // side: THREE.DoubleSide,
-    // depthWrite: false,
-    // blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
     uniforms: {
         uTime: new THREE.Uniform(0),
-        uColor: new THREE.Uniform(new THREE.Color('red'))
+        uColor: new THREE.Uniform(new THREE.Color(materialParameters.color))
     }
 });
 
