@@ -29,7 +29,7 @@ const cubeTextureLoader = new THREE.CubeTextureLoader()
  * Material
  */
 const materialParameters = {};
-materialParameters.color = '#70c1ff';
+materialParameters.color = '#fff';
 
 gui.addColor(materialParameters, 'color').name("material color").onChange( e => {
     material.uniforms.uColor.value.set(materialParameters.color);
@@ -38,7 +38,11 @@ gui.addColor(materialParameters, 'color').name("material color").onChange( e => 
 
 const material = new THREE.ShaderMaterial({
     vertexShader: vertexShader,
-    fragmentShader: fragmentShader
+    fragmentShader: fragmentShader,
+    uniforms:
+        {
+            uColor: new THREE.Uniform(new THREE.Color(materialParameters.color)),
+        }
 });
 
 /**
@@ -81,9 +85,40 @@ const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 
 camera.position.set(4, 1, - 4)
 scene.add(camera)
 
+//light helper
+
+//directional light helper
+const directionalLightHelper = new THREE.Mesh(
+    new THREE.PlaneGeometry(),
+    new THREE.MeshBasicMaterial()
+)
+directionalLightHelper.material.color.setRGB(0.1, 0.1, 1.0);
+directionalLightHelper.material.side = THREE.DoubleSide;
+directionalLightHelper.position.set(0.0, 0.0, 3.0);
+scene.add(directionalLightHelper);
+
+//point light helper
+const pointLightHelper = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.1, 2),
+    new THREE.MeshBasicMaterial()
+)
+pointLightHelper.material.color.setRGB(1, 0.1, 0.1);
+pointLightHelper.position.set(0,2.5,0);
+scene.add(pointLightHelper);
+
+
+const pointLightHelper2 = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.1, 2),
+    new THREE.MeshBasicMaterial()
+)
+pointLightHelper2.material.color.setRGB(0.1,1.0,0.5);
+pointLightHelper2.position.set(0.0, -2.5, -2.0);
+scene.add(pointLightHelper2);
+
+
 //renderer setup
 const rendererParameters = {}
-rendererParameters.clearColor = '#1d1f2a'
+rendererParameters.clearColor = '#000'
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setClearColor(rendererParameters.clearColor)
