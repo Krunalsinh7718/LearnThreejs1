@@ -226,12 +226,14 @@ function animation() {
 
 function playHandWave() {
   roboHandWaveAnim.play();
+  roboHandWaveAnim.crossFadeFrom(roboHandWaveAnim,1);
 }
 function stopHandWave() {
   roboHandWaveAnim.stop();
 }
 function playHeadWave() {
   roboHeadWaveAnim.play();
+  roboHeadWaveAnim.crossFadeFrom(roboHandWaveAnim,1);
 }
 function stopHeadWave() {
   roboHeadWaveAnim.stop();
