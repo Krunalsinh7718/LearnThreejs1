@@ -20,6 +20,11 @@ const parameters = {
 =============================================*/
 const gui = new GUI();
 
+/*=============================================
+=            Raycaster            =
+=============================================*/
+
+const raycaster = new THREE.Raycaster();
 
 /*=============================================
 =            Models            =
@@ -29,18 +34,32 @@ dracoLoader.setDecoderPath('/loaders/draco/')
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader)
 let roboModel = null;
+let threeAnimationMixer = null;
+let roboAnimations = null, roboHeadWaveAnim = null, roboHandWaveAnim = null;
 // let mixer = null
-gltfLoader.load("/models/test/box_anim_1.glb",
+// gltfLoader.load("/models/robo/scene.gltf",
+gltfLoader.load("/models/robo/robo_animation_1.glb",
   (gltf) => {
-    // console.log(gltf);
+    console.log(gltf);
     roboModel = gltf.scene;
+
+    threeAnimationMixer = new THREE.AnimationMixer(roboModel);
+    roboAnimations = gltf.animations;
+    console.log();
+
+
+    roboHandWaveAnim = threeAnimationMixer.clipAction(roboAnimations[0]);
+    roboHeadWaveAnim = threeAnimationMixer.clipAction(roboAnimations[1]);
+
+    //  roboHeadWaveAnim.play();
+    //  roboHandWaveAnim.play();
 
     roboModel.scale.set(0.25, 0.25, 0.25);
     // mixer = new THREE.AnimationMixer(roboModel)
     // const action = mixer.clipAction(gltf.animations[2])
     // action.play()
     scene.add(roboModel);
-    animateRobo(gltf, roboModel);
+    animateRobo();
   },
   (progress) => {
     console.log('progress')
@@ -51,22 +70,16 @@ gltfLoader.load("/models/test/box_anim_1.glb",
     console.log(error)
   }
 )
-var threeAnimation = null;
-function animateRobo(gltf, roboModel) {
 
-  // console.log("modal => ",gltf);
-  const animations = gltf.animations;
-  console.log(animations);
-  
-  
- threeAnimation =  new THREE.AnimationMixer(roboModel);
+function animateRobo() {
+  roboModel.rotation.y = 0.78;
+  gsap.to(roboModel.position, {
+    y: 1,
+    duration: 2,
+    yoyo: true,
+    repeat: -1
+  })
 
- const circularAnim = threeAnimation.clipAction(animations[0]);
- const rotateAnim = threeAnimation.clipAction(animations[1]);
- const scaleAnim = threeAnimation.clipAction(animations[2]);
- circularAnim.play();
- rotateAnim.play();
- scaleAnim.play();
 }
 
 function mapToRange(valueX, valueY) {
@@ -101,7 +114,7 @@ const scene = new THREE.Scene();
 =            Camera setup            =
 =============================================*/
 const camera = new THREE.PerspectiveCamera(75, parameters.canvasWidth / parameters.canvasHeight, 0.1, 100)
-camera.position.set(-8, 2, 0)
+camera.position.set(-12, 4, 0)
 scene.add(camera)
 
 /*=============================================
@@ -141,7 +154,6 @@ const floor = new THREE.Mesh(
 )
 floor.receiveShadow = true
 floor.rotation.x = - Math.PI * 0.5
-floor.position.y = -1
 scene.add(floor)
 
 /*=============================================
@@ -166,17 +178,61 @@ scene.add(directionalLight)
 =============================================*/
 const clock = new THREE.Clock();
 let previousTime = 0;
+let currentIntersect = null;
 function animation() {
 
   //elapsed time
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - previousTime;
   previousTime = elapsedTime;
+  
+  if (threeAnimationMixer) {
+    threeAnimationMixer.update(deltaTime)
+  }
+  
+  raycaster.setFromCamera(mouse, camera);
+  
+  let roboHover = false, floorHover = false;
+  if (roboModel) {
+    const intersects = raycaster.intersectObjects([floor, roboModel]);
 
-  if(threeAnimation)
-    {
-        threeAnimation.update(deltaTime)
+    roboHover = intersects.some(e => {
+      if(e === roboModel) return true;
+    })
+
+    floorHover = intersects.some(e => {
+      if(e === floor) return true;
+    })
+
+    console.log("robo hover = ", roboHover," floorHover = ", floorHover);
+    
+
+    if (intersects.length) {
+
+      const point = intersects[0].point;
+      roboModel.position.x -= (  roboModel.position.x  - point.x) * 0.05;
+      roboModel.position.z -= (  roboModel.position.z  - point.z) * 0.05;
+
+      if (!currentIntersect ) {
+        console.log('mouse enter');
+        playHandWave();
+        stopHeadWave();
+      }
+
+      currentIntersect = intersects[0]
     }
+    else {
+      if (currentIntersect) {
+        console.log('mouse leave')
+        stopHandWave();
+        playHeadWave();
+        // roboHandWaveAnim.reset();
+      }
+
+      currentIntersect = null
+    }
+  }
+
 
   // Update controls
   controls.update()
@@ -185,6 +241,24 @@ function animation() {
   renderer.render(scene, camera)
 }
 
+function playHandWave() {
+  roboHandWaveAnim.play();
+  roboHandWaveAnim.crossFadeFrom(roboHandWaveAnim,1);
+}
+function stopHandWave() {
+  roboHandWaveAnim.stop();
+}
+function playHeadWave() {
+  roboHeadWaveAnim.play();
+  roboHeadWaveAnim.crossFadeFrom(roboHandWaveAnim,1);
+}
+function stopHeadWave() {
+  roboHeadWaveAnim.stop();
+}
+
+
+//  roboHeadWaveAnim.play();
+//  roboHandWaveAnim.play();
 
 /*=============================================
 =            Events setup            =
@@ -201,16 +275,22 @@ window.addEventListener('resize', e => {
 })
 
 
+const mouse = new THREE.Vector2();
+window.addEventListener('mousemove', e => {
 
-// window.addEventListener('mousemove', e => {
-//   const x = e.clientX;
-//   const y = e.clientY;
-//   const rotateValue = mapToRange(x, y);
+  mouse.x = e.clientX / parameters.canvasWidth * 2 - 1
+  mouse.y = -(e.clientY / parameters.canvasHeight) * 2 + 1
 
-//   roboModel.rotation.y = rotateValue.x;
-//   roboModel.rotation.z = rotateValue.y;
+  const x = e.clientX;
+  const y = e.clientY;
+  const rotateValue = mapToRange(x, y);
 
-// })
+  if (roboModel) {
+    roboModel.rotation.y = rotateValue.x;
+    roboModel.rotation.z = rotateValue.y;
+  }
+
+})
 
 
 

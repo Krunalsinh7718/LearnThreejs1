@@ -196,8 +196,8 @@ function animation() {
   if (roboModel) {
     const intersects = raycaster.intersectObjects([roboModel])
     if (intersects.length) {
-      if (!currentIntersect) {
-        console.log('mouse enter');
+      if (!currentIntersect ) {
+        // console.log('mouse enter');
         playHandWave();
         stopHeadWave();
       }
@@ -206,7 +206,7 @@ function animation() {
     }
     else {
       if (currentIntersect) {
-        console.log('mouse leave')
+        // console.log('mouse leave')
         stopHandWave();
         playHeadWave();
         // roboHandWaveAnim.reset();
