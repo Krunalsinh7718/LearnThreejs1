@@ -114,6 +114,8 @@ function animation() {
   const elapsedTime = clock.getElapsedTime();
 
   const progress = (elapsedTime * 0.08) % 1;
+  // console.log(progress);
+  
   const position = curve.getPointAt(progress) ;
   // console.log(position, curve.getPoint(position));
   box.position.copy(position);
