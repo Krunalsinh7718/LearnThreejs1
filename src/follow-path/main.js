@@ -64,21 +64,35 @@ controls.enableDamping = true
 
 
 /*=============================================
-=           mesh          =
+=           platform          =
 =============================================*/
-
+const planeSize = 50;
+const halfPlane = planeSize * 0.5;
+const planeStart =  0 - halfPlane;
+const planeEnd = halfPlane;
+const plane = new THREE.Mesh(
+  new THREE.PlaneGeometry(planeSize, planeSize),
+  new THREE.MeshStandardMaterial({
+    side: THREE.DoubleSide
+  })
+);
+plane.position.y = -5;
+plane.rotation.x = - Math.PI / 2;
+scene.add(plane);
 
 
 /*=============================================
 =            path            =
 =============================================*/
 //Create a closed wavey loop
+const edgeOffset = 10;
 const curve = new THREE.CatmullRomCurve3( [
-	new THREE.Vector3( -10, 0, 10 ),
-	new THREE.Vector3( -5, 5, 5 ),
-	new THREE.Vector3( 0, 0, 0 ),
-	new THREE.Vector3( 5, -5, 5 ),
-	new THREE.Vector3( 10, 0, 10 )
+	new THREE.Vector3( planeStart + edgeOffset, 0, planeStart + edgeOffset),
+	new THREE.Vector3( planeStart + edgeOffset, 10, 0),
+	new THREE.Vector3( planeStart + edgeOffset, 0, planeEnd - edgeOffset),
+	new THREE.Vector3( planeEnd - edgeOffset, 0, planeEnd - edgeOffset),
+	new THREE.Vector3( planeEnd - edgeOffset, 0, planeStart + edgeOffset),
+	
 ], true );
 console.log(curve.getLength());
 
@@ -89,18 +103,28 @@ const material = new THREE.LineBasicMaterial( { color: 0xff0000 } );
 const curveObject = new THREE.Line( geometry, material );
 scene.add(curveObject);
 
-
-const boxGeometry = new THREE.BoxGeometry(1,1,1);
+const boxCount = 5;
+const boxes = [];
+const boxGeometry = new THREE.BoxGeometry(1,1,3);
 const boxMaterial = new THREE.MeshStandardMaterial({
   color: "blue"
 })
+for (let i = 0; i < boxCount; i++) {
+  const box = new THREE.Mesh(
+      boxGeometry,
+      boxMaterial
+  )
+  boxes.push(box);
+  scene.add(box);
+}
+
 const box = new THREE.Mesh(boxGeometry, boxMaterial);
 scene.add(box);
 
 /*=============================================
 =            lights            =
 =============================================*/
-const ambientLight = new THREE.AmbientLight(0xffffff, 2.1)
+const ambientLight = new THREE.AmbientLight(0xffffff, 2)
 scene.add(ambientLight)
 
 
@@ -113,16 +137,34 @@ function animation() {
   //elapsed time
   const elapsedTime = clock.getElapsedTime();
 
-  const progress = (elapsedTime * 0.08) % 1;
-  // console.log(progress);
+  // const progress = (elapsedTime * 0.08) % 1;
   
-  const position = curve.getPointAt(progress) ;
-  // console.log(position, curve.getPoint(position));
-  box.position.copy(position);
+  // const position = curve.getPointAt(progress) ;
   
-  const tangent = curve.getTangentAt(progress).normalize();
-  box.lookAt(position.clone().add(tangent))
+  // box.position.copy(position);
+  
+  // const tangent = curve.getTangentAt(progress).normalize();
+  // box.lookAt(position.clone().add(tangent))
   // Update controls
+
+
+  for (let i = 0; i < boxes.length; i++) {
+    const box = boxes[i];
+
+    const progress = ((elapsedTime * 0.08) % 1) + (i * 0.027);
+  
+    const position = curve.getPointAt(progress);
+
+    // console.log(progress);
+    
+    
+    box.position.copy(position);
+    
+    const tangent = curve.getTangentAt(progress).normalize();
+    box.lookAt(position.clone().add(tangent))
+
+    
+  }
   controls.update()
 
   // Render
