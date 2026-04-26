@@ -13,12 +13,23 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 const parameters = {
   canvasWidth: window.innerWidth,
   canvasHeight: window.innerHeight,
+  speed: 0.002,
+  gravity: 0.15,
+  velocity: 0.004,
+  minVelocity : 0.000,
+  maxVelocity: 0.08,
+  trainBoxGap : 4,
+  // Math.max(0.005, Math.min(0.08, velocity));
 }
 
 /*=============================================
 =            GUI setup            =
 =============================================*/
 const gui = new GUI();
+gui.add(parameters, "speed").min(0).max(0.008).step(0.0001);
+gui.add(parameters, "gravity").min(0).max(1).step(0.01);
+gui.add(parameters, "velocity").min(0).max(0.05).step(0.0001);
+gui.add(parameters, "trainBoxGap").min(3).max(8).step(1);
 
 
 /*=============================================
@@ -132,12 +143,25 @@ scene.add(ambientLight)
 =            animation loop            =
 =============================================*/
 const clock = new THREE.Clock();
-function animation() {
+let progress = 0;
 
+
+
+const curveLength = curve.getLength();
+
+function wrap01(t) {
+  return ((t % 1) + 1) % 1;
+}
+
+function animation() {
+  
+  const distBetweenBox = parameters.trainBoxGap / curveLength;
   //elapsed time
   const elapsedTime = clock.getElapsedTime();
 
   // const progress = (elapsedTime * 0.08) % 1;
+  // console.log(progress);
+  
   
   // const position = curve.getPointAt(progress) ;
   
@@ -146,25 +170,37 @@ function animation() {
   // const tangent = curve.getTangentAt(progress).normalize();
   // box.lookAt(position.clone().add(tangent))
   // Update controls
+  // 1. Get slope at current position
+  const tangent = curve.getTangentAt(progress);
+  const slope = tangent.y;
+
+  // 2. Modify velocity based on slope
+  let velocity = parameters.velocity;
+  velocity += (-slope) * parameters.gravity * 0.01;
+
+  // 3. Optional: damp toward base speed (prevents runaway speed)
+  velocity += (parameters.speed - velocity) * 0.02;
+
+  // 4. Clamp speed (important)
+  velocity = Math.max(parameters.minVelocity, Math.min(parameters.maxVelocity, velocity));
+
+  // 5. Move forward
+  progress += velocity;
+  progress = wrap01(progress);
 
 
   for (let i = 0; i < boxes.length; i++) {
-    const box = boxes[i];
+    
+    let coachProgress = progress - (i * distBetweenBox);
+    coachProgress = wrap01(coachProgress);
 
-    const progress = ((elapsedTime * 0.08) % 1) + (i * 0.027);
-  
-    const position = curve.getPointAt(progress);
+    const position = curve.getPointAt(coachProgress);
+    boxes[i].position.copy(position);
 
-    // console.log(progress);
-    
-    
-    box.position.copy(position);
-    
-    const tangent = curve.getTangentAt(progress).normalize();
-    box.lookAt(position.clone().add(tangent))
-
-    
+    const tangent = curve.getTangentAt(coachProgress).normalize();
+    boxes[i].lookAt(position.clone().add(tangent));
   }
+
   controls.update()
 
   // Render
