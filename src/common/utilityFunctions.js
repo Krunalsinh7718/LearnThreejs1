@@ -9,4 +9,12 @@ function textureRepeat(texture, repeatCountX, repeatCountY, wrapT = true){
     }
 }
 
-export { textureRepeat}
+function blenderToThree([x, y, z]) {
+  return new THREE.Vector3(
+    x,   // X stays X
+    z,   // Z → Y
+    -y   // Y → -Z
+  );
+}
+
+export { textureRepeat, blenderToThree}
