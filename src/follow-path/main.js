@@ -164,10 +164,16 @@ scene.add(box);
 /*=============================================
 =            lights            =
 =============================================*/
-const ambientLight = new THREE.AmbientLight(0xffffff, 2)
+const ambientLight = new THREE.AmbientLight(0xffffff, 1)
 scene.add(ambientLight)
 
+const directionalLight = new THREE.DirectionalLight("rgb(255, 230, 0)", 2);
+directionalLight.position.set(5, 10, 5)
+scene.add(directionalLight);
+gui.add(directionalLight, 'intensity').min(0).max(3).step(0.001).name( 'directionalLight intensity' );
 
+const dirLightHelper = new THREE.DirectionalLightHelper(directionalLight);
+scene.add(dirLightHelper)
 /*=============================================
 =            animation loop            =
 =============================================*/
