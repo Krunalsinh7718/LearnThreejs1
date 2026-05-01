@@ -83,6 +83,18 @@ gltfLoader.load("/models/train-mountain/train-mou.glb", loadedModel => {
 })
 
 /*=============================================
+=            train mountain model            =
+=============================================*/
+let trainModal = null;
+gltfLoader.load("/models/train/train.glb", loadedModel => {
+  // console.log(loadedModel);
+  trainModal = loadedModel.scene;
+  trainModal.scale.set(0.5, 0.5, 0.5);
+  // scene.add(trainModal)
+})
+
+
+/*=============================================
 =           platform          =
 =============================================*/
 const planeSize = 50;
@@ -150,16 +162,22 @@ const boxMaterial = new THREE.MeshStandardMaterial({
   color: "blue"
 })
 for (let i = 0; i < boxCount; i++) {
-  const box = new THREE.Mesh(
-      boxGeometry,
-      boxMaterial
-  )
-  boxes.push(box);
-  scene.add(box);
+  if(i !== 0){
+    const box = new THREE.Mesh(
+        boxGeometry,
+        boxMaterial
+    )
+    boxes.push(box);
+    scene.add(box);
+  }else{
+    
+    boxes.push(trainModal);
+    scene.add(trainModal);
+  }
 }
 
-const box = new THREE.Mesh(boxGeometry, boxMaterial);
-scene.add(box);
+// const box = new THREE.Mesh(boxGeometry, boxMaterial);
+// scene.add(box);
 
 /*=============================================
 =            lights            =
@@ -223,7 +241,7 @@ function animation() {
   progress += velocity;
   progress = wrap01(progress);
 
-
+if(trainModal){
   for (let i = 0; i < boxes.length; i++) {
     
     let coachProgress = progress - (i * distBetweenBox);
@@ -235,6 +253,7 @@ function animation() {
     const tangent = curve.getTangentAt(coachProgress).normalize();
     boxes[i].lookAt(position.clone().add(tangent));
   }
+}
 
   controls.update()
 

@@ -1,0 +1,11 @@
+Model Information:
+* title:	LowPoly Train
+* source:	https://sketchfab.com/3d-models/lowpoly-train-7242b3c0deb044db97639f7a6b125223
+* author:	Dewi (https://sketchfab.com/Dewi1911)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "LowPoly Train" (https://sketchfab.com/3d-models/lowpoly-train-7242b3c0deb044db97639f7a6b125223) by Dewi (https://sketchfab.com/Dewi1911) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
