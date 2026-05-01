@@ -36,9 +36,24 @@ gui.add(parameters, "trainBoxGap").min(3).max(8).step(1);
 /*=============================================
 =            Models            =
 =============================================*/
+const lodingManager = new THREE.LoadingManager();
+lodingManager.onStart = () => {
+  console.log('Loading started');
+};
+lodingManager.onLoad = () => {
+  console.log('Loading complete');
+  pushModels();
+};
+lodingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+  console.log(`Loading file: ${url}. Loaded ${itemsLoaded} of ${itemsTotal} files.`);
+};
+lodingManager.onError = (url) => {
+  console.error(`There was an error loading ${url}`);
+};
+
 const dracoLoader = new DRACOLoader()
 dracoLoader.setDecoderPath('/loaders/draco/')
-const gltfLoader = new GLTFLoader();
+const gltfLoader = new GLTFLoader(lodingManager);
 gltfLoader.setDRACOLoader(dracoLoader)
 
 /*=============================================
@@ -78,20 +93,24 @@ controls.enableDamping = true
 gltfLoader.load("/models/train-mountain/train-mou.glb", loadedModel => {
   // console.log(loadedModel);
   const model = loadedModel.scene;
-  model.translateY(-0.1);
+  model.translateY(-0.3);
   scene.add(model)
 })
 
-/*=============================================
-=            train mountain model            =
-=============================================*/
 let trainModal = null;
 gltfLoader.load("/models/train/train.glb", loadedModel => {
   // console.log(loadedModel);
   trainModal = loadedModel.scene;
-  trainModal.scale.set(0.5, 0.5, 0.5);
-  // scene.add(trainModal)
+  trainModal.scale.set(0.09, 0.09, 0.09);
 })
+
+let trainContainerModal = null;
+gltfLoader.load("/models/train/train-container.glb", loadedModel => {
+  // console.log(loadedModel);
+  trainContainerModal = loadedModel.scene;
+  trainContainerModal.scale.set(0.09, 0.09, 0.09);
+})
+
 
 
 /*=============================================
@@ -161,23 +180,34 @@ const boxGeometry = new THREE.BoxGeometry(0.25,0.25,0.75);
 const boxMaterial = new THREE.MeshStandardMaterial({
   color: "blue"
 })
-for (let i = 0; i < boxCount; i++) {
+
+
+// const box = new THREE.Mesh(boxGeometry, boxMaterial);
+// scene.add(box);
+
+/*=============================================
+=            train  model            =
+=============================================*/
+
+
+function pushModels(){
+  for (let i = 0; i < boxCount; i++) {
   if(i !== 0){
-    const box = new THREE.Mesh(
-        boxGeometry,
-        boxMaterial
-    )
-    boxes.push(box);
-    scene.add(box);
+    // const box = new THREE.Mesh(
+    //     boxGeometry,
+    //     boxMaterial
+    // )
+    const container = trainContainerModal.clone();
+    boxes.push(container);
+    scene.add(container);
   }else{
     
     boxes.push(trainModal);
     scene.add(trainModal);
   }
+  }
+  
 }
-
-// const box = new THREE.Mesh(boxGeometry, boxMaterial);
-// scene.add(box);
 
 /*=============================================
 =            lights            =
