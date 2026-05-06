@@ -20,6 +20,7 @@ const parameters = {
   minVelocity : 0.000,
   maxVelocity: 0.08,
   trainBoxGap : 1,
+  debug: false
   // Math.max(0.005, Math.min(0.08, velocity));
 }
 
@@ -27,10 +28,16 @@ const parameters = {
 =            GUI setup            =
 =============================================*/
 const gui = new GUI();
-gui.add(parameters, "speed").min(0).max(0.008).step(0.0001);
+// gui.add(parameters, "speed").min(0).max(0.008).step(0.0001);
 gui.add(parameters, "gravity").min(0).max(1).step(0.01);
-gui.add(parameters, "velocity").min(0.0001).max(0.007).step(0.0001);
-gui.add(parameters, "trainBoxGap").min(3).max(8).step(1);
+gui.add(parameters, "velocity").min(0.0001).max(0.007).step(0.0001).name("Speed");
+gui.add(parameters, "trainBoxGap").min(3).max(8).step(1).name("Train box gap");
+gui.add(parameters, "debug").name("Debug").onChange(e => {
+  // console.log(e);
+  parameters.debug = e;
+  curveObject.visible = parameters.debug;
+  dirLightHelper.visible = parameters.debug;
+});
 
 
 /*=============================================
@@ -90,10 +97,12 @@ controls.enableDamping = true
 /*=============================================
 =            train mountain model            =
 =============================================*/
-gltfLoader.load("/models/train-mountain/train-mou.glb", loadedModel => {
+gltfLoader.load("/models/train-mountain/train-mou-1.glb", loadedModel => {
   // console.log(loadedModel);
   const model = loadedModel.scene;
   model.translateY(-0.3);
+  model.castShadow = true;
+  model.receiveShadow = true;
   scene.add(model)
 })
 
@@ -101,6 +110,8 @@ let trainModal = null;
 gltfLoader.load("/models/train/train.glb", loadedModel => {
   // console.log(loadedModel);
   trainModal = loadedModel.scene;
+  trainModal.castShadow = true;
+  trainModal.receiveShadow = true;
   trainModal.scale.set(0.09, 0.09, 0.09);
 })
 
@@ -108,6 +119,8 @@ let trainContainerModal = null;
 gltfLoader.load("/models/train/train-container.glb", loadedModel => {
   // console.log(loadedModel);
   trainContainerModal = loadedModel.scene;
+  trainContainerModal.castShadow = true;
+  trainContainerModal.receiveShadow = true;
   trainContainerModal.scale.set(0.09, 0.09, 0.09);
 })
 
@@ -116,7 +129,7 @@ gltfLoader.load("/models/train/train-container.glb", loadedModel => {
 /*=============================================
 =           platform          =
 =============================================*/
-const planeSize = 50;
+const planeSize = 80;
 const halfPlane = planeSize * 0.5;
 const planeStart =  0 - halfPlane;
 const planeEnd = halfPlane;
@@ -126,7 +139,7 @@ const plane = new THREE.Mesh(
     side: THREE.DoubleSide
   })
 );
-plane.position.y = -5;
+plane.position.y = -15;
 plane.rotation.x = - Math.PI / 2;
 scene.add(plane);
 
@@ -168,11 +181,14 @@ for (let i = 0; i < blenderPoints.length - 1; i++) {
 }
 
 const points = curve.getPoints( 50 );
-const geometry = new THREE.BufferGeometry().setFromPoints( points );
-const material = new THREE.LineBasicMaterial( { color: 0xff0000 } );
+const curveGeometry = new THREE.BufferGeometry().setFromPoints( points );
+const curveMaterial = new THREE.LineBasicMaterial( { color: 0xff0000} );
 // Create the final object to add to the scene
-const curveObject = new THREE.Line( geometry, material );
+const curveObject = new THREE.Line( curveGeometry, curveMaterial );
+curveObject.visible = parameters.debug;
+
 scene.add(curveObject);
+
 
 const boxCount = 5;
 const boxes = [];
@@ -212,15 +228,19 @@ function pushModels(){
 /*=============================================
 =            lights            =
 =============================================*/
-const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
 scene.add(ambientLight)
 
-const directionalLight = new THREE.DirectionalLight("rgb(255, 230, 0)", 2);
+const directionalLight = new THREE.DirectionalLight("rgb(242, 247, 172)", 2);
+directionalLight.target.position.set(0,-0.3,0);
+directionalLight.castShadow = true;
 directionalLight.position.set(5, 10, 5)
+scene.add(directionalLight.target);
 scene.add(directionalLight);
 gui.add(directionalLight, 'intensity').min(0).max(3).step(0.001).name( 'directionalLight intensity' );
 
 const dirLightHelper = new THREE.DirectionalLightHelper(directionalLight);
+dirLightHelper.visible = parameters.debug;
 scene.add(dirLightHelper)
 /*=============================================
 =            animation loop            =
@@ -241,6 +261,16 @@ function animation() {
   const distBetweenBox = parameters.trainBoxGap / curveLength;
   //elapsed time
   const elapsedTime = clock.getElapsedTime();
+
+  const lightPositionX = Math.sin(elapsedTime * 0.1) * 15;
+  const lightPositionY = Math.cos(elapsedTime * 0.1) * 15;
+  const lightPositionZ = Math.sin(elapsedTime * 0.1) * 15;
+  directionalLight.position.set(lightPositionX, lightPositionY, lightPositionZ);
+directionalLight.target.position.set(0,-0.3,0);
+
+ directionalLight.target.updateMatrixWorld(); // Ensure it updates
+    
+    if (dirLightHelper) dirLightHelper.update(); // Update helper
 
   // const progress = (elapsedTime * 0.08) % 1;
   // console.log(progress);
