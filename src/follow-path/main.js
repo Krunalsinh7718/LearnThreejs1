@@ -6,6 +6,7 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { blenderToThree } from "../common/utilityFunctions";
+import { getMeshesByName } from "../common/utilityFunctions";
 
 
 /*=============================================
@@ -97,13 +98,22 @@ controls.enableDamping = true
 /*=============================================
 =            train mountain model            =
 =============================================*/
-gltfLoader.load("/models/train-mountain/train-mou-1.glb", loadedModel => {
+gltfLoader.load("/models/train-mountain/train-mou-2.glb", loadedModel => {
   // console.log(loadedModel);
   const model = loadedModel.scene;
+  console.log(model);
+  
   model.translateY(-0.3);
-  model.castShadow = true;
-  model.receiveShadow = true;
   scene.add(model)
+  
+  const meshes = getMeshesByName(model, "earth");
+  meshes.forEach( mesh => {
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+
+  })
+  // console.log("Circle013", meshes);
+  
 })
 
 let trainModal = null;
