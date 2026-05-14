@@ -2,27 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>My first three.js app</title>
+    <title>Train Mountain</title>
     <style>
       body { margin: 0; }
       .hotspot {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: white;
-      border: 2px solid black;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      cursor: pointer;
-
-      transition: transform 0.3s;
+         width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: 2px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s;
     }
 
     .hotspot:hover {
       transform: scale(1.2);
+      & + .label{
+         scale: 1;
+        opacity: 1;
+      }
     }
 
     .label {
@@ -31,12 +33,49 @@
       text-align: center;
       font-size: 14px;
       white-space: nowrap;
+      position: absolute;
+      left: 145%;
+      top: 1px;
+      pointer-events: none;
+      scale: 0;
+      opacity: 0;
+      transform-origin: left center;
+      transition: 300ms;
     }
 
     .hotspot-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+    .loading{
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: 150ms;
+    }
+    .loading.hide{
+      opacity: 0;
+      pointer-events: none;
+    }
+    .count-text{
+      text-align: center;
+      font-size: 50px;
+      font-weight: bold;
+      color: #fff;
+    }
+    .slider{
+      height: 2px;
+      width: 100%;
+      background-color: #fff;
+    }
+    .slider-progress{
+      height: 100%;
+      background-color: skyblue;
     }
     </style>
     <script type="importmap">
@@ -50,5 +89,13 @@
   </head>
   <body>
     <script type="module" src="./main.js"></script>
+    <div class="loading">
+      <div class="count-text">
+        <span class="count">0</span>%
+      </div>
+      <span class="slider">
+        <div class="slider-progress"></div>
+      </span>
+    </div>
   </body>
 </html>

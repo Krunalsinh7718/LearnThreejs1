@@ -12,6 +12,9 @@ import { getMeshesByName } from "../common/utilityFunctions";
 /*=============================================
 =            common variables            =
 =============================================*/
+const loading = document.querySelector(".loading");
+const sliderCount = document.querySelector(".count");
+const sliderProgress = document.querySelector(".slider-progress");
 const parameters = {
   canvasWidth: window.innerWidth,
   canvasHeight: window.innerHeight,
@@ -21,8 +24,17 @@ const parameters = {
   minVelocity: 0.000,
   maxVelocity: 0.08,
   trainBoxGap: 1,
-  debug: true,
-  trainDriverView : false
+  debug: false,
+  trainDriverViewEnable : false,
+  setSunsetView: function() { 
+     setPosition(false, new THREE.Vector3(-2, 6, -4), new THREE.Vector3( 2,3,4 ));
+  },
+  setWaterfallView: function() { 
+     setPosition(false, new THREE.Vector3( 1, 4, 3 ), new THREE.Vector3( 0, 2, -3 ));
+  },
+  setTrainDriverView: function() { 
+     setPosition(true, new THREE.Vector3(5, 4, -3), new THREE.Vector3(5, 4, -3));
+  },
   // Math.max(0.005, Math.min(0.08, velocity));
 }
 
@@ -47,6 +59,9 @@ gui.add(parameters, "debug").name("Debug").onChange(e => {
 
   axisHelper.visible = parameters.debug;
 });
+gui.add(parameters, "setSunsetView").name("Sunset View");
+gui.add(parameters, "setWaterfallView").name("Waterfall View");
+gui.add(parameters, "setTrainDriverView").name("Train Driver View");
 
 
 /*=============================================
@@ -61,7 +76,14 @@ lodingManager.onLoad = () => {
   pushModels();
 };
 lodingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+  const percent = (itemsLoaded * 100) / itemsTotal;
   console.log(`Loading file: ${url}. Loaded ${itemsLoaded} of ${itemsTotal} files.`);
+  sliderCount.innerHTML = Math.floor(percent);
+  sliderProgress.style.width = `${percent}%`;
+  if(percent === 100){
+    loading.classList.add("hide");
+  }
+
 };
 lodingManager.onError = (url) => {
   console.error(`There was an error loading ${url}`);
@@ -261,7 +283,7 @@ directionalLightSun.shadow.normalBias = 0.02;
 scene.add(directionalLightSun.target);
 scene.add(directionalLightSun);
 
-gui.add(directionalLightSun, 'intensity').min(0).max(3).step(0.001).name('Directional Light Intensity');
+gui.add(directionalLightSun, 'intensity').min(0).max(3).step(0.001).name('Sun Light Intensity');
 
 const dirLightSunHelper = new THREE.DirectionalLightHelper(directionalLightSun);
 dirLightSunHelper.visible = parameters.debug;
@@ -294,7 +316,7 @@ directionalLightMoon.shadow.normalBias = 0.02;
 scene.add(directionalLightMoon.target);
 scene.add(directionalLightMoon);
 
-gui.add(directionalLightMoon, 'intensity').min(0).max(3).step(0.001).name('Directional Light Intensity');
+gui.add(directionalLightMoon, 'intensity').min(0).max(3).step(0.001).name('Moon Light Intensity');
 
 const dirLightMoonHelper = new THREE.DirectionalLightHelper(directionalLightMoon);
 dirLightMoonHelper.visible = parameters.debug;
@@ -333,24 +355,24 @@ document.body.appendChild(labelRenderer.domElement);
 =============================================*/
 createHotspot({
   position: new THREE.Vector3(-2, 6, -4),
-  label: 'Sunset Point',
+  label: {index : 1, text: 'Sunset Point'},
   cameraPosition: new THREE.Vector3(-2, 6, -4),
   target: new THREE.Vector3( 2,3,4 )
 });
 
 createHotspot({
   position: new THREE.Vector3(1, 4, 3),
-  label: 'Waterfall View',
+  label: {index : 2, text :'Waterfall View'},
   cameraPosition: new THREE.Vector3( 1, 4, 3 ),
   target: new THREE.Vector3( 0, 2, -3 )
 });
 
 createHotspot({
   position: new THREE.Vector3(5, 4, -3),
-  label: 'Train Driver View',
+  label: {index : 3, text :'Train Driver View'},
   cameraPosition: new THREE.Vector3(5, 4, -3),
   target: new THREE.Vector3(5, 4, -3),
-  trainDriverView : true
+  trainDriverViewEnable : true
 });
 
 /*=============================================
@@ -424,7 +446,7 @@ function animation() {
       const tangent = curve.getTangentAt(coachProgress).normalize();
       boxes[i].lookAt(position.clone().add(tangent));
 
-      if (i === 0 && parameters.trainDriverView) {
+      if (i === 0 && parameters.trainDriverViewEnable) {
 
         camera.position.copy(
           position.clone()
@@ -480,7 +502,7 @@ function createHotspot({
   label,
   cameraPosition,
   target,
-  trainDriverView
+  trainDriverViewEnable
 }) {
 
   // HTML
@@ -489,11 +511,11 @@ function createHotspot({
 
   const button = document.createElement('div');
   button.className = 'hotspot';
-  button.innerHTML = '+';
+  button.innerHTML = label.index;
 
   const text = document.createElement('div');
   text.className = 'label';
-  text.textContent = label;
+  text.textContent = label.text;
 
   wrapper.appendChild(button);
   wrapper.appendChild(text);
@@ -508,12 +530,18 @@ function createHotspot({
 
   // CLICK EVENT
   button.addEventListener('click', () => {
+    setPosition(trainDriverViewEnable, cameraPosition, target);
+  });
 
-    if(trainDriverView){
-      parameters.trainDriverView = true;
+  scene.add(hotspot);
+}
+
+function setPosition(trainDriverViewEnable, cameraPosition, target){
+  if(trainDriverViewEnable){
+      parameters.trainDriverViewEnable = true;
       controls.enabled = false;
     }else{
-       parameters.trainDriverView = false;
+       parameters.trainDriverViewEnable = false;
       controls.enabled = false;
   
       gsap.to(camera.position, {
@@ -546,11 +574,6 @@ function createHotspot({
         }
       });
     }
-
-
-  });
-
-  scene.add(hotspot);
 }
 
 
