@@ -5,6 +5,7 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+import { getMeshesByName } from "../common/utilityFunctions";
 
 
 /*=============================================
@@ -33,50 +34,67 @@ const dracoLoader = new DRACOLoader()
 dracoLoader.setDecoderPath('/loaders/draco/')
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader)
-let roboModel = null;
+let paperMesh = null;
 let threeAnimationMixer = null;
 let modelAnimations = null;
 let modelAnimStep1 = null, modelAnimStep2 = null, modelAnimStep3 = null;
 let animFunctions = {
   step1 : function(){
-    modelAnimStep1.play();
+    goToStep(0);
   },
   step2 : function(){
-    modelAnimStep2.play();
+    goToStep(1);
   },
   step3 : function(){
-    modelAnimStep3.play();
+    goToStep(2);
+  },
+  next : function(){
+    goToNextStep();
+  },
+  previous : function(){
+    goToPrevStep();
   },
 }
+
+gui.add(animFunctions, 'step1');
+gui.add(animFunctions, 'step2');
+gui.add(animFunctions, 'step3');
+gui.add(animFunctions, 'next');
+gui.add(animFunctions, 'previous');
 // let mixer = null
 // gltfLoader.load("/models/robo/scene.gltf",
 gltfLoader.load("/models/paper-bird/paper-bird-2.glb",
   (gltf) => {
-    console.log(gltf);
-    roboModel = gltf.scene;
+    console.log("model",gltf);
+    const model = gltf.scene;
+    const mesh = getMeshesByName(model, "Paper");
+    paperMesh = mesh[0];
+    console.log("paper mesh",paperMesh);
+    console.log("morph data",paperMesh.morphTargetDictionary);
+    
 
-    threeAnimationMixer = new THREE.AnimationMixer(roboModel);
-    modelAnimations = gltf.animations;
-    console.log();
+    // threeAnimationMixer = new THREE.AnimationMixer(roboModel);
+    // modelAnimations = gltf.animations;
 
 
-    modelAnimStep1 = threeAnimationMixer.clipAction(modelAnimations[0]);
-    modelAnimStep2 = threeAnimationMixer.clipAction(modelAnimations[1]);
-    modelAnimStep3 = threeAnimationMixer.clipAction(modelAnimations[2]);
+    // modelAnimStep1 = threeAnimationMixer.clipAction(modelAnimations[0]);
+    // modelAnimStep2 = threeAnimationMixer.clipAction(modelAnimations[1]);
+    // modelAnimStep3 = threeAnimationMixer.clipAction(modelAnimations[2]);
 
     //  roboHeadWaveAnim.play();
     //  roboHandWaveAnim.play();
 
-    gui.add(animFunctions, "step1").name("step 1");
-    gui.add(animFunctions, "step2").name("step 2");
-    gui.add(animFunctions, "step3").name("step 3");
+    // gui.add(animFunctions, "step1").name("step 1");
+    // gui.add(animFunctions, "step2").name("step 2");
+    // gui.add(animFunctions, "step3").name("step 3");
 
-    roboModel.scale.set(0.25, 0.25, 0.25);
+    // roboModel.scale.set(0.25, 0.25, 0.25);
     // mixer = new THREE.AnimationMixer(roboModel)
     // const action = mixer.clipAction(gltf.animations[2])
     // action.play()
-    scene.add(roboModel);
+    scene.add(paperMesh);
     // animateRobo();
+    // goToStep(paperMesh[0], 0);
   },
   (progress) => {
     console.log('progress')
@@ -87,17 +105,30 @@ gltfLoader.load("/models/paper-bird/paper-bird-2.glb",
     console.log(error)
   }
 )
+let currentStep = -1;
+function goToNextStep(){
+  currentStep++;
+  console.log(currentStep);
+  
 
-function animateRobo() {
-  roboModel.rotation.y = 0.78;
-  gsap.to(roboModel.position, {
-    y: 1,
-    duration: 2,
-    yoyo: true,
-    repeat: -1
-  })
-
+  gsap.to(paperMesh.morphTargetInfluences, {
+        [currentStep]: 1,
+        duration: 0.5
+    });
+  
 }
+
+function goToPrevStep(){
+  console.log(currentStep);
+  gsap.to(paperMesh.morphTargetInfluences, {
+    [currentStep]: 0,
+    duration: 0.5
+  });
+  
+  currentStep--;
+}
+
+
 
 function mapToRange(valueX, valueY) {
   const minInput = 0;
@@ -131,7 +162,7 @@ const scene = new THREE.Scene();
 =            Camera setup            =
 =============================================*/
 const camera = new THREE.PerspectiveCamera(75, parameters.canvasWidth / parameters.canvasHeight, 0.1, 100)
-camera.position.set(-8, 2, 0)
+camera.position.set(-16, 8, -16)
 scene.add(camera)
 
 /*=============================================
@@ -208,33 +239,6 @@ function animation() {
     threeAnimationMixer.update(deltaTime)
   }
 
-  // raycaster.setFromCamera(mouse, camera)
-
-
-  // if (roboModel) {
-  //   const intersects = raycaster.intersectObjects([roboModel])
-  //   if (intersects.length) {
-  //     if (!currentIntersect ) {
-  //       // console.log('mouse enter');
-  //       playHandWave();
-  //       stopHeadWave();
-  //     }
-
-  //     currentIntersect = intersects[0]
-  //   }
-  //   else {
-  //     if (currentIntersect) {
-  //       // console.log('mouse leave')
-  //       stopHandWave();
-  //       playHeadWave();
-  //       // roboHandWaveAnim.reset();
-  //     }
-
-  //     currentIntersect = null
-  //   }
-  // }
-
-
   // Update controls
   controls.update()
 
@@ -242,20 +246,6 @@ function animation() {
   renderer.render(scene, camera)
 }
 
-function playHandWave() {
-  roboHandWaveAnim.play();
-  roboHandWaveAnim.crossFadeFrom(roboHandWaveAnim,1);
-}
-function stopHandWave() {
-  roboHandWaveAnim.stop();
-}
-function playHeadWave() {
-  roboHeadWaveAnim.play();
-  roboHeadWaveAnim.crossFadeFrom(roboHandWaveAnim,1);
-}
-function stopHeadWave() {
-  roboHeadWaveAnim.stop();
-}
 
 
 //  roboHeadWaveAnim.play();
