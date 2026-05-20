@@ -6,6 +6,7 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { getMeshesByName } from "../common/utilityFunctions";
+import { Sky } from 'three/addons/objects/Sky.js'
 
 
 /*=============================================
