@@ -6,7 +6,6 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { getMeshesByName } from "../common/utilityFunctions";
-import { Sky } from 'three/addons/objects/Sky.js'
 
 
 /*=============================================
@@ -22,11 +21,7 @@ const parameters = {
 =============================================*/
 const gui = new GUI();
 
-/*=============================================
-=            Raycaster            =
-=============================================*/
 
-const raycaster = new THREE.Raycaster();
 
 /*=============================================
 =            Models            =
@@ -37,15 +32,7 @@ const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader)
 let paperMesh = null;
 
-let animFunctions = {
-  
-  next : function(){
-    goToNextStep();
-  },
-  previous : function(){
-    goToPrevStep();
-  },
-}
+
 
 /*=============================================
 =            HTML step buttons            =
@@ -67,14 +54,11 @@ flyAnimBtn.addEventListener('click' , e => {
   playFlyAnimation();
 })
 
-// gui.add(animFunctions, 'next');
-// gui.add(animFunctions, 'previous');
-// let mixer = null
-// gltfLoader.load("/models/robo/scene.gltf",
+
 let flyAnimationClip = null, flyAnimation = null, threeAnimationMixer = null;
 gltfLoader.load("/models/paper-bird/paper-bird.glb",
   (gltf) => {
-    console.log("model",gltf);
+    // console.log("model",gltf);
     const model = gltf.scene;
     const mesh = getMeshesByName(model, "Paper");
     paperMesh = mesh[0];
@@ -83,7 +67,7 @@ gltfLoader.load("/models/paper-bird/paper-bird.glb",
 
     flyAnimationClip = gltf.animations.filter(e => e.name === 'fly')[0];
     flyAnimation = threeAnimationMixer.clipAction(flyAnimationClip);
-    console.log(flyAnimation);
+    // console.log(flyAnimation);
     
   },
   (progress) => {
@@ -159,28 +143,9 @@ function checkForStepRange(){
   }
 }
 
-function mapToRange(valueX, valueY) {
-  const minInput = 0;
-  const maxInputX = window.innerWidth;
-  const maxInputY = window.innerHeight;
 
-  const minOutput = -0.78;
-  const maxOutput = 0.78;
 
-  return {
-    x: (
-      ((valueX - minInput) * (maxOutput - minOutput)) /
-      (maxInputX - minInput) +
-      minOutput
-    ),
-    y: (
-      ((valueY - minInput) * (maxOutput - minOutput)) /
-      (maxInputY - minInput) +
-      minOutput
-    )
-  }
-    ;
-}
+
 
 /*=============================================
 =            Scene and world setup            =
@@ -293,8 +258,6 @@ function animation() {
 
 
 
-//  roboHeadWaveAnim.play();
-//  roboHandWaveAnim.play();
 
 /*=============================================
 =            Events setup            =
@@ -311,22 +274,7 @@ window.addEventListener('resize', e => {
 })
 
 
-const mouse = new THREE.Vector2();
-// window.addEventListener('mousemove', e => {
 
-//   mouse.x = e.clientX / parameters.canvasWidth * 2 - 1
-//   mouse.y = -(e.clientY / parameters.canvasHeight) * 2 + 1
-
-//   const x = e.clientX;
-//   const y = e.clientY;
-//   const rotateValue = mapToRange(x, y);
-
-//   if (roboModel) {
-//     roboModel.rotation.y = rotateValue.x;
-//     roboModel.rotation.z = rotateValue.y;
-//   }
-
-// })
 
 
 
