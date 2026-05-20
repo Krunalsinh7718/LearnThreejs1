@@ -7,10 +7,10 @@
   },
   "dependencies": {
     "cannon-es": "^0.15.1",
-    "gsap": "^3.13.0",
+    "gsap": "^3.15.0",
     "three": "^0.180.0",
-    "vercel": "^48.8.2",
-    "vite-plugin-glsl": "^1.5.5"
+    "vercel": "^48.12.1",
+    "vite-plugin-glsl": "^1.6.0"
   },
   "devDependencies": {
     "lil-gui": "^0.21.0",
