@@ -5,6 +5,8 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+import { getMeshesByName } from "../common/utilityFunctions";
+import { Sky } from 'three/addons/objects/Sky.js'
 
 
 /*=============================================
@@ -33,70 +35,128 @@ const dracoLoader = new DRACOLoader()
 dracoLoader.setDecoderPath('/loaders/draco/')
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader)
-let roboModel = null;
-let threeAnimationMixer = null;
-let modelAnimations = null;
-let modelAnimStep1 = null, modelAnimStep2 = null, modelAnimStep3 = null;
+let paperMesh = null;
+
 let animFunctions = {
-  step1 : function(){
-    modelAnimStep1.play();
+  
+  next : function(){
+    goToNextStep();
   },
-  step2 : function(){
-    modelAnimStep2.play();
-  },
-  step3 : function(){
-    modelAnimStep3.play();
+  previous : function(){
+    goToPrevStep();
   },
 }
+
+/*=============================================
+=            HTML step buttons            =
+=============================================*/
+const nextStepBtn = document.querySelector(".btn-next");
+const prevStepBtn = document.querySelector(".btn-prev");
+const flyAnimBtn = document.querySelector(".btn-fly");
+const stepText = document.querySelector(".step");
+
+
+nextStepBtn.addEventListener('click', e => {
+  goToNextStep();
+})
+prevStepBtn.addEventListener('click', e => {
+  goToPrevStep();
+})
+flyAnimBtn.addEventListener('click' , e => {
+  
+  playFlyAnimation();
+})
+
+// gui.add(animFunctions, 'next');
+// gui.add(animFunctions, 'previous');
 // let mixer = null
 // gltfLoader.load("/models/robo/scene.gltf",
-gltfLoader.load("/models/paper-bird/paper-bird-2.glb",
+let flyAnimationClip = null, flyAnimation = null, threeAnimationMixer = null;
+gltfLoader.load("/models/paper-bird/paper-bird.glb",
   (gltf) => {
-    console.log(gltf);
-    roboModel = gltf.scene;
+    console.log("model",gltf);
+    const model = gltf.scene;
+    const mesh = getMeshesByName(model, "Paper");
+    paperMesh = mesh[0];
+    threeAnimationMixer = new THREE.AnimationMixer(paperMesh);
+    scene.add(paperMesh);
 
-    threeAnimationMixer = new THREE.AnimationMixer(roboModel);
-    modelAnimations = gltf.animations;
-    console.log();
-
-
-    modelAnimStep1 = threeAnimationMixer.clipAction(modelAnimations[0]);
-    modelAnimStep2 = threeAnimationMixer.clipAction(modelAnimations[1]);
-    modelAnimStep3 = threeAnimationMixer.clipAction(modelAnimations[2]);
-
-    //  roboHeadWaveAnim.play();
-    //  roboHandWaveAnim.play();
-
-    gui.add(animFunctions, "step1").name("step 1");
-    gui.add(animFunctions, "step2").name("step 2");
-    gui.add(animFunctions, "step3").name("step 3");
-
-    roboModel.scale.set(0.25, 0.25, 0.25);
-    // mixer = new THREE.AnimationMixer(roboModel)
-    // const action = mixer.clipAction(gltf.animations[2])
-    // action.play()
-    scene.add(roboModel);
-    // animateRobo();
+    flyAnimationClip = gltf.animations.filter(e => e.name === 'fly')[0];
+    flyAnimation = threeAnimationMixer.clipAction(flyAnimationClip);
+    console.log(flyAnimation);
+    
   },
   (progress) => {
-    console.log('progress')
-    console.log(progress)
+    // console.log('progress')
+    // console.log(progress)
   },
   (error) => {
-    console.log('error')
-    console.log(error)
+    // console.log('error')
+    // console.log(error)
   }
 )
+let currentStep = -1;
+function playFlyAnimation(){
+  if(currentStep > 15){
+    flyAnimation.play();
+  }else{
+    return
+  }
+}
+function goToNextStep(){
+  flyAnimation.stop();
+  
+  currentStep++;
+  checkForStepRange()
+  if(currentStep > 15){
+    flyAnimBtn.removeAttribute('disabled')
+    return;
+  }else{
+    flyAnimBtn.setAttribute('disabled', true);
+  }
+  // console.log(currentStep);
+  stepText.innerHTML = currentStep + 1;
 
-function animateRobo() {
-  roboModel.rotation.y = 0.78;
-  gsap.to(roboModel.position, {
-    y: 1,
-    duration: 2,
-    yoyo: true,
-    repeat: -1
-  })
+  gsap.to(paperMesh.morphTargetInfluences, {
+      [currentStep]: 1,
+      duration: 0.5
+  });
+}
 
+function goToPrevStep(){
+  flyAnimation.stop();
+  flyAnimBtn.setAttribute('disabled', true);
+  if(currentStep < 0){
+    return;
+  }
+  stepText.innerHTML = currentStep;
+  
+  gsap.to(paperMesh.morphTargetInfluences, {
+    [currentStep]: 0,
+    duration: 0.5
+  });
+  
+  currentStep--;
+  // console.log(currentStep);
+
+  checkForStepRange()
+}
+
+function checkForStepRange(){
+  // console.log(currentStep);
+
+
+  if(currentStep < 0){
+    prevStepBtn.setAttribute('disabled', true)
+  }else{
+    prevStepBtn.removeAttribute('disabled')
+  }
+
+  if(currentStep > 15){
+    nextStepBtn.setAttribute('disabled', true)
+  }else{
+    nextStepBtn.removeAttribute('disabled')
+  }
 }
 
 function mapToRange(valueX, valueY) {
@@ -131,7 +191,7 @@ const scene = new THREE.Scene();
 =            Camera setup            =
 =============================================*/
 const camera = new THREE.PerspectiveCamera(75, parameters.canvasWidth / parameters.canvasHeight, 0.1, 100)
-camera.position.set(-8, 2, 0)
+camera.position.set(-16, 15, -16)
 scene.add(camera)
 
 /*=============================================
@@ -153,10 +213,26 @@ const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
 
 
-/*=============================================
-=           mesh          =
-=============================================*/
+/**
+ * Sky
+ */
+const sky = new Sky();
+sky.material.uniforms['turbidity'].value = 1.5
+sky.material.uniforms['rayleigh'].value = 0.8
+sky.material.uniforms['mieCoefficient'].value = 0.18
+sky.material.uniforms['mieDirectionalG'].value = 0.5
+sky.material.uniforms['sunPosition'].value.set(1.75, 0, 2)
+sky.scale.set(100, 100, 100)
+scene.add(sky);
 
+
+gui.add(sky.material.uniforms.turbidity, 'value').min(0).max(20).step(0.5).name('sun turbidity');
+gui.add(sky.material.uniforms.rayleigh, 'value').min(0).max(6).step(0.1).name('sun rayleigh');
+gui.add(sky.material.uniforms.mieCoefficient, 'value').min(0).max(0.5).step(0.02).name('sun mieCoefficient');
+gui.add(sky.material.uniforms.mieDirectionalG, 'value').min(0).max(2).step(0.5).name('sun mieDirectionalG');
+gui.add(sky.material.uniforms.sunPosition.value, 'x').min(-2).max(2).step(0.05).name('sun sunPosition x');
+gui.add(sky.material.uniforms.sunPosition.value, 'y').min(-2).max(2).step(0.05).name('sun sunPosition y');
+gui.add(sky.material.uniforms.sunPosition.value, 'z').min(-2).max(2).step(0.05).name('sun sunPosition z');
 
 /*=============================================
 =            floor            =
@@ -208,33 +284,6 @@ function animation() {
     threeAnimationMixer.update(deltaTime)
   }
 
-  // raycaster.setFromCamera(mouse, camera)
-
-
-  // if (roboModel) {
-  //   const intersects = raycaster.intersectObjects([roboModel])
-  //   if (intersects.length) {
-  //     if (!currentIntersect ) {
-  //       // console.log('mouse enter');
-  //       playHandWave();
-  //       stopHeadWave();
-  //     }
-
-  //     currentIntersect = intersects[0]
-  //   }
-  //   else {
-  //     if (currentIntersect) {
-  //       // console.log('mouse leave')
-  //       stopHandWave();
-  //       playHeadWave();
-  //       // roboHandWaveAnim.reset();
-  //     }
-
-  //     currentIntersect = null
-  //   }
-  // }
-
-
   // Update controls
   controls.update()
 
@@ -242,20 +291,6 @@ function animation() {
   renderer.render(scene, camera)
 }
 
-function playHandWave() {
-  roboHandWaveAnim.play();
-  roboHandWaveAnim.crossFadeFrom(roboHandWaveAnim,1);
-}
-function stopHandWave() {
-  roboHandWaveAnim.stop();
-}
-function playHeadWave() {
-  roboHeadWaveAnim.play();
-  roboHeadWaveAnim.crossFadeFrom(roboHandWaveAnim,1);
-}
-function stopHeadWave() {
-  roboHeadWaveAnim.stop();
-}
 
 
 //  roboHeadWaveAnim.play();
